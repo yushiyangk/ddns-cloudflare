@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Yu Shiyang <yu.shiyang@gnayihs.uy>
+# Requires curl, jq
 
+# Yu Shiyang <yu.shiyang@gnayihs.uy>
 
 # Authentication
 zoneid=''
