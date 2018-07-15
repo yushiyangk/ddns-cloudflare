@@ -8,7 +8,7 @@ zoneid=''
 authkey=''
 authemail=''
 # List of domain names to update within the zone
-names=('example.net' 'sub.example.net' '*.wild.example.net')
+names=('example.net' 'subdomain.example.net' '*.wildcard.example.net')
 
 ###
 
