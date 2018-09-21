@@ -37,8 +37,3 @@ for i in "${names[@]}"; do
 		echo -e "\e[97m${i}\e[39m unchanged; skipped"
 	fi
 done
-
-
-
-
-
