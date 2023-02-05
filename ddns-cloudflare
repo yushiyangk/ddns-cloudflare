@@ -16,10 +16,10 @@
 export DDNS_CLOUDFLARE_DIR='/usr/local/etc/ddns-cloudflare'
 
 # auth
-zoneid="$(sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/auth" | xargs -n 1 )"
-authtoken="$(sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/auth" | xargs -n 1 )"
+zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/auth" | xargs -n 1 )"
+authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/auth" | xargs -n 1 )"
 # domains
-IFS=$'\n' names=( $(sudo sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/domains" | xargs -d ',' -n 1 | xargs -l) )
+IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/domains" | xargs -d ',' -n 1 | xargs -l ) )
 
 unset DDNS_CLOUDFLARE_DIR
 
