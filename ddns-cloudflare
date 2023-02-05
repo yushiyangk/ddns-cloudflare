@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 
 # Update Cloudflare DNS using this server's public IP address
-# Usage: ./ddns-cloudflare
 # Requires curl, jq
+# Usage: ./ddns-cloudflare
+#
 # Yu Shiyang <yu.shiyang@gnayihs.uy>
 
 # List of domains to update is given in /usr/local/etc/ddns-cloudflare/domains in this format:
 #   domains='example.com', 'subdomain.example.com', '*.wildcard.example.com'
+#
 # Authentication information for Cloudflare is given in /usr/local/etc/ddns-cloudflare/auth in this format:
 #   zoneid=zoneid
 #   authtoken=authtoken
-# Single or double quotes are optional
+#
+# Values may optionally be enclosed in single or double quotes
 
 
 export DDNS_CLOUDFLARE_DIR='/usr/local/etc/ddns-cloudflare'
