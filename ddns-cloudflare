@@ -2,7 +2,7 @@
 
 # Update Cloudflare DNS using this server's public IP address
 # Requires curl, jq
-# Usage: ./ddns-cloudflare
+# Usage: ddns-cloudflare [-qh] [options]
 #
 # Yu Shiyang <yu.shiyang@gnayihs.uy>
 
@@ -14,6 +14,38 @@
 #   authtoken=authtoken
 #
 # Values may optionally be enclosed in single or double quotes
+
+
+help="Usage: ddns-cloudflare [-qh] [options]\n"
+help="$help\nOptions:"
+help="$help\n  -q, --quiet     Use once to disable printing unchanged domains to stdout"
+help="$help\n                  Use twice to disable printing all status to stdout status"
+help="$help\n                  Error messages will always be printed to stderr"
+help="$help\n  -h, -?, --help  Display this help message and exit"
+quiet=0
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--help)
+			echo -e "$help"
+			exit 0
+			;;
+		--quiet) ((++quiet)) ;;
+		-*)
+			flags=( $(echo "${1:1}" | grep -o .) )
+			for flag in "${flags[@]}"; do
+				case "$flag" in
+					h|\?)
+						echo -e "$help"
+						exit 0
+						;;
+					q) ((++quiet)) ;;
+				esac
+			done
+			;;
+	esac
+	shift
+done
 
 
 export DDNS_CLOUDFLARE_DIR='/usr/local/etc/ddns-cloudflare'
@@ -28,7 +60,9 @@ unset DDNS_CLOUDFLARE_DIR
 
 publicip="$( curl -s checkip.dyndns.org | cut -d ':' -f 2 | cut -d '<' -f 1 | cut -d ' ' -f 2 )"
 
-echo -e "Detected IP from \e[94mcheckip.dyndns.org\e[39m: \e[97m$publicip\e[39m"
+if [ $quiet -le 0 ]; then
+	echo -e "Detected IP from \e[94mcheckip.dyndns.org\e[39m: \e[97m$publicip\e[39m"
+fi
 
 for i in "${names[@]}"; do
 	response="$( curl -s -X GET 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records?type=A&name='"${i}" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" )"
@@ -39,14 +73,24 @@ for i in "${names[@]}"; do
 		recordproxied="$( echo "$response" | jq -Mr '.result[0].proxied' )"
 		code="$( curl -s -o /tmp/ddns-cloudflare.response -w '%{http_code}' -X PUT 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records/'"$recordid" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" --data '{"type":"A","name":"'"${i}"'","content":"'"$publicip"'","ttl":'"$recordttl"',"proxied":'"$recordproxied"'}' )"
 		if [ "$code" == 200 ]; then
-			echo -e "200: \e[97m${i}\e[39m updated to $publicip"
+			if [ $quiet -le 1 ]; then
+				echo -e "200: \e[97m${i}\e[39m updated to $publicip"
+			fi
 		else
-			echo -e "\e[31m$code: \e[97m${i}\e[31m failed to update\e[39m"
-			cat /tmp/ddns-cloudflare.response
-			echo
+			if [ $quiet -le 1 ]; then
+				echo -e "\e[31m$code: \e[97m${i}\e[31m failed to update\e[39m"
+			fi
+			cat /tmp/ddns-cloudflare.response >& 2
+			error=1
 		fi
 		rm /tmp/ddns-cloudflare.response
 	else
-		echo -e "\e[97m${i}\e[39m unchanged; skipped"
+		if [ $quiet -le 0 ]; then
+			echo -e "\e[97m${i}\e[39m unchanged; skipped"
+		fi
 	fi
 done
+
+if [ -n "$error" ]; then
+	exit 1
+fi
