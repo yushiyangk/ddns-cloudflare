@@ -55,7 +55,11 @@ Run
 ddns-cloudflare
 ```
 
+Run `ddns-cloudflare -q` or `ddns-cloudflare -qq` to reduce output verbosity. Run `ddns-cloudflare -h` for more information.
+
+### Scheduling
+
 To run the dynamic DNS updater at regular intervals, run `sudo crontab -e` and add the following
-<code><pre>*/<var>interval</var> * * * * /usr/local/bin/ddns-cloudflare</pre></code>
+<code><pre>*/<var>interval</var> * * * * /usr/local/bin/ddns-cloudflare -qq</pre></code>
 
 This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
