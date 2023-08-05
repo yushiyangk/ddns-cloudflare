@@ -6,10 +6,10 @@
 #
 # Yu Shiyang <yu.shiyang@gnayihs.uy>
 
-# List of domains to update is given in /usr/local/etc/ddns-cloudflare/domains in this format:
+# List of domains to update is given in /etc/opt/ddns-cloudflare/domains in this format:
 #   domains='example.com', 'subdomain.example.com', '*.wildcard.example.com'
 #
-# Authentication information for Cloudflare is given in /usr/local/etc/ddns-cloudflare/auth in this format:
+# Authentication information for Cloudflare is given in /etc/opt/ddns-cloudflare/auth in this format:
 #   zoneid=zoneid
 #   authtoken=authtoken
 #
@@ -48,7 +48,7 @@ while [ $# -gt 0 ]; do
 done
 
 
-export DDNS_CLOUDFLARE_DIR='/usr/local/etc/ddns-cloudflare'
+export DDNS_CLOUDFLARE_DIR='/etc/opt/ddns-cloudflare'
 
 # auth
 zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/auth" | xargs -n 1 )"
