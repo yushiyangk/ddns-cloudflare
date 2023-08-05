@@ -15,7 +15,6 @@
 #
 # Values may optionally be enclosed in single or double quotes
 
-
 help="Usage: ddns-cloudflare [-qh] [options]\n"
 help="$help\nOptions:"
 help="$help\n  -q, --quiet     Use once to disable printing unchanged domains to stdout"
@@ -24,6 +23,7 @@ help="$help\n                  Error messages will always be printed to stderr"
 help="$help\n  -h, -?, --help  Display this help message and exit"
 quiet=0
 
+name="$0"
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--help)
@@ -31,6 +31,10 @@ while [ $# -gt 0 ]; do
 			exit 0
 			;;
 		--quiet) ((++quiet)) ;;
+		--*)
+			echo "$name: invalid option '$1'" >& 2
+			exit 2
+			;;
 		-*)
 			flags=( $(echo "${1:1}" | grep -o .) )
 			for flag in "${flags[@]}"; do
@@ -40,9 +44,15 @@ while [ $# -gt 0 ]; do
 						exit 0
 						;;
 					q) ((++quiet)) ;;
+					*)
+						echo "$name: invalid option '$flag'" >& 2
+						exit 2
 				esac
 			done
 			;;
+		*)
+			echo "$name: invalid argument '$1'" >& 2
+			exit 2
 	esac
 	shift
 done
@@ -80,6 +90,7 @@ for i in "${names[@]}"; do
 			if [ $quiet -le 1 ]; then
 				echo -e "\e[31m$code: \e[97m${i}\e[31m failed to update\e[39m"
 			fi
+			echo -n "$name: " >& 2
 			cat /tmp/ddns-cloudflare.response >& 2
 			error=1
 		fi
