@@ -105,12 +105,33 @@ IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE
 
 unset DDNS_CLOUDFLARE_DIR
 
+
 publicip="$( curl -s checkip.dyndns.org | cut -d ':' -f 2 | cut -d '<' -f 1 | cut -d ' ' -f 2 )"
 
-if [ $quiet -le 0 ]; then
-	echo -e "Detected IP from \e[94mcheckip.dyndns.org\e[39m: \e[97m$publicip\e[39m"
+if [ -z "$publicip" ]; then
+	error=1
+	if [ -z "$warnafter" ]; then
+		echo "$name: failed to detect IP address" >& 2
+	else
+		if [ -f /tmp/ddns-cloudflare.first-error ]; then
+			if [ $(date -d -"$warnafter" +%s) -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
+				echo "$name: failed to detect IP address" >& 2
+				echo "$name: failing since $(date -d -"$warnafter" -R)" >& 2
+			fi
+		else
+			date +%s > /tmp/ddns-cloudflare.first-error
+		fi
+	fi
+	exit 1
+else
+	if [ $quiet -le 0 ]; then
+		echo -e "Detected IP address from \e[94mcheckip.dyndns.org\e[39m: \e[97m$publicip\e[39m"
+	fi
 fi
 
+
+error=0
+delayederrorprint=0
 for i in "${names[@]}"; do
 	response="$( curl -s -X GET 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records?type=A&name='"${i}" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" )"
 	recordip="$( echo "$response" | jq -Mr '.result[0].content' )"
@@ -119,7 +140,6 @@ for i in "${names[@]}"; do
 		recordttl="$( echo "$response" | jq -Mr '.result[0].ttl' )"
 		recordproxied="$( echo "$response" | jq -Mr '.result[0].proxied' )"
 		code="$( curl -s -o /tmp/ddns-cloudflare.response -w '%{http_code}' -X PUT 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records/'"$recordid" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" --data '{"type":"A","name":"'"${i}"'","content":"'"$publicip"'","ttl":'"$recordttl"',"proxied":'"$recordproxied"'}' )"
-		code=1
 		if [ "$code" == 200 ]; then
 			if [ $quiet -le 1 ]; then
 				echo -e "200: \e[97m${i}\e[39m updated to $publicip"
@@ -128,6 +148,7 @@ for i in "${names[@]}"; do
 				rm /tmp/ddns-cloudflare.first-error
 			fi
 		else
+			error=1
 			if [ $quiet -le 1 ]; then
 				echo -e "\e[31m$code: \e[97m${i}\e[31m failed to update\e[39m"
 			fi
@@ -139,13 +160,13 @@ for i in "${names[@]}"; do
 					if [ $(date -d -"$warnafter" +%s) -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
 						echo -n "$name: " >& 2
 						cat /tmp/ddns-cloudflare.response >& 2
-						echo "$name: failing since $(date -d -"$warnafter" -R)" >& 2
+						echo "" >& 2
+						delayederrorprint=1
 					fi
 				else
 					date +%s > /tmp/ddns-cloudflare.first-error
 				fi
 			fi
-			error=1
 		fi
 		rm /tmp/ddns-cloudflare.response
 	else
@@ -155,6 +176,13 @@ for i in "${names[@]}"; do
 	fi
 done
 
-if [ -n "$error" ]; then
+if [ $delayederrorprint -ne 0 ]; then
+	echo "$name: failing since $(date -d -"$warnafter" -R)" >& 2
+fi
+if [ $error -ne 0 ]; then
 	exit 1
+else
+	if [ -f /tmp/ddns-cloudflare.first-error ]; then
+		rm /tmp/ddns-cloudflare.first-error
+	fi
 fi
