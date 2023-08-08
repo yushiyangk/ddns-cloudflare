@@ -2,9 +2,11 @@
 
 Dynamic DNS updater for Cloudflare
 
-## Installing
+## Install
 
-1. Ensure that `curl` and `jq` are installed and accessible on the system `PATH`
+This tool depends on the packages `curl`, `findutils` and `jq`.
+
+1. Ensure that `curl`, `jq` and `xargs` (part of `findutils`) are installed and accessible on the system `PATH`
 
 2. Install `ddns-cloudflare` to `/opt/ddns-cloudflare`
 
@@ -16,9 +18,9 @@ Dynamic DNS updater for Cloudflare
 	sudo chmod u+x /opt/ddns-cloudflare/ddns-cloudflare
 	```
 
-4. Ensure that `/opt/ddns-cloudflare` is added to the `PATH` environment variable (or add `/opt/bin` to `PATH` and add a symlink to `/opt/ddns-cloudflare/ddns-cloudflare`)
+4. Ensure that `/opt/ddns-cloudflare` is added to the `PATH` environment variable (or add `/opt/bin` to `PATH` and add a symlink from there to `/opt/ddns-cloudflare/ddns-cloudflare`)
 
-### Configuring
+### Configure
 
 1. Create a config directory at `/etc/opt/ddns-cloudflare`
 
@@ -47,7 +49,7 @@ Dynamic DNS updater for Cloudflare
 	sudo chmod go-rwx /etc/opt/ddns-cloudflare/auth
 	```
 
-## Running
+## Run
 
 Run
 
@@ -57,7 +59,7 @@ ddns-cloudflare
 
 Run `ddns-cloudflare -q` or `ddns-cloudflare -qq` to reduce output verbosity. Run `ddns-cloudflare -h` for more information.
 
-### Scheduling
+### Run schedule
 
 To run the dynamic DNS updater at regular intervals, run `sudo crontab -e` and add the following
 <code><pre>*/<var>interval</var> * * * * /etc/opt/ddns-cloudflare -qq</pre></code>

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Update Cloudflare DNS using this server's public IP address
-# Requires curl, jq
+# Requires curl, findutils, jq
 # Usage: ddns-cloudflare [-qh] [options]
 #
 # Yu Shiyang <yu.shiyang@gnayihs.uy>
