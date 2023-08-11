@@ -11,8 +11,7 @@ RUN apk update && \
 RUN mkdir -p /etc/default-crontabs && \
 	mv /etc/crontabs/* /etc/default-crontabs
 
-COPY --link docker/entrypoint.sh /usr/bin/entrypoint.sh
-COPY --link ddns-cloudflare ddns-cloudflare
+COPY --link --chmod=544 docker/entrypoint.sh ddns-cloudflare ./
 
 # tmpfs
 VOLUME /etc/crontabs
