@@ -2,7 +2,7 @@
 
 # Update Cloudflare DNS using this server's public IP address
 # Requires curl, findutils, jq
-# Usage: ddns-cloudflare [-qh] [options]
+# Usage: ddns-cloudflare [-qh] [<options>]
 #
 # Yu Shiyang <yu.shiyang@gnayihs.uy>
 
@@ -17,7 +17,8 @@
 
 name="ddns-cloudflare"
 
-help="Usage: ddns-cloudflare [-qh] [options]\n"
+help="Usage: ddns-cloudflare [-qh] [<options>]"
+help="$help\n"
 help="$help\nOptions:"
 help="$help\n  -q, --quiet     Use once to disable printing unchanged domains to stdout"
 help="$help\n                  Use twice to disable printing all status to stdout status"
@@ -95,15 +96,15 @@ while [ $# -gt 0 ]; do
 done
 
 
-export DDNS_CLOUDFLARE_DIR='/etc/opt/ddns-cloudflare'
+export DDNS_CLOUDFLARE_CONFIG_DIR='/etc/opt/ddns-cloudflare'
 
 # auth
-zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/auth" | xargs -n 1 )"
-authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/auth" | xargs -n 1 )"
+zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_CONFIG_DIR/auth" | xargs -n 1 )"
+authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_CONFIG_DIR/auth" | xargs -n 1 )"
 # domains
-IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_DIR/domains" | xargs -d ',' -n 1 | xargs -l ) )
+IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_CONFIG_DIR/domains" | xargs -d ',' -n 1 | xargs -l ) )
 
-unset DDNS_CLOUDFLARE_DIR
+unset DDNS_CLOUDFLARE_CONFIG_DIR
 
 
 publicip="$( curl -s checkip.dyndns.org | cut -d ':' -f 2 | cut -d '<' -f 1 | cut -d ' ' -f 2 )"
