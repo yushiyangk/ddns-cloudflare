@@ -13,7 +13,7 @@ RUN mv /etc/crontabs /etc/default-crontabs && \
 	mv /var/spool/cron /var/spool/default-cron && \
 	mkdir -p /var/spool/cron
 
-COPY --link --chmod=544 docker/entrypoint.sh ddns-cloudflare ./
+COPY --link --chmod=544 docker/build/entrypoint.sh ddns-cloudflare ./
 
 # tmpfs
 VOLUME /etc/crontabs
