@@ -90,6 +90,21 @@ This runs the ddns-cloudflare service using Docker Compose.
 	sudo docker compose up
 	```
 
+### Start service on boot
+
+Install the Systemd unit file and enable the service:
+
+```
+sudo ln -s /srv/docker/ddns-cloudflare/ddns-cloudflare.service /etc/systemd/system/ddns-cloudflare.service && sudo systemctl daemon-reload
+sudo systemctl enable ddns-cloudflare && sudo service ddns-cloudflare start
+```
+
+Check the status of the service:
+
+```
+sudo service ddns-cloudflare status
+```
+
 ### Use Docker without Compose
 
 1. Create a working directory, e.g. at `/srv/docker/ddns-cloudflare`.
