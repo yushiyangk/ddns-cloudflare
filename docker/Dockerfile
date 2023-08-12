@@ -8,19 +8,20 @@ RUN apk update && \
 	apk upgrade --no-cache --no-interactive && \
 	apk add --no-cache --no-interactive bash curl findutils jq ssmtp
 
-RUN mkdir -p /etc/default-crontabs && \
-	mv /etc/crontabs/* /etc/default-crontabs
+RUN mv /etc/crontabs /etc/default-crontabs && \
+	mkdir -p /etc/crontabs && \
+	mv /var/spool/cron /var/spool/default-cron && \
+	mkdir -p /var/spool/cron
 
 COPY --link --chmod=544 docker/entrypoint.sh ddns-cloudflare ./
 
 # tmpfs
 VOLUME /etc/crontabs
+VOLUME /etc/ssmtp
+VOLUME /var/spool/cron
 
 # bind
 VOLUME /etc/opt/ddns-cloudflare
 VOLUME /etc/ssmtp/ssmtp.conf
-
-# ddns-cloudflare-state
-VOLUME /tmp
 
 ENTRYPOINT ["entrypoint.sh"]

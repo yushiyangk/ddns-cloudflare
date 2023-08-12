@@ -1,9 +1,11 @@
 #!/bin/sh
 
 cp -a /etc/default-crontabs/* /etc/crontabs
+cp -a /var/spool/default-cron/* /var/spool/cron
 
-crontab="MAILFROM=$MAIL_FROM"
-crontab="$crontab\nMAILTO=$MAIL_TO"
+echo "root:ddns-cloudflare@$MAIL_DOMAIN" > /etc/ssmtp/revaliases
+
+crontab="MAILTO=$MAIL_TO"
 crontab="$crontab\n*/$DDNS_CLOUDFLARE_PERIOD * * * * /opt/ddns-cloudflare/ddns-cloudflare $@"
 echo -e "$crontab" >> /etc/crontabs/root
 
