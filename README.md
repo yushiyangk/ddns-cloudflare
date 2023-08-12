@@ -6,23 +6,22 @@ Dynamic DNS updater for Cloudflare
 
 This tool depends on the packages `curl`, `findutils` and `jq`.
 
-1. Ensure that `curl`, `jq` and `xargs` (part of `findutils`) are installed and accessible on the system `PATH`
+1. Ensure that `curl`, `jq` and `xargs` (part of `findutils`) are installed and accessible on `PATH`
 
-2. Install `ddns-cloudflare` to `/opt/ddns-cloudflare`
+2. Install `ddns-cloudflare` from this repository to `/opt/ddns-cloudflare/`
 
-3. Ensure that only the root user has execute permissions
+3. Set permissions
 
 	```bash
 	sudo chown -R root: /opt/ddns-cloudflare
-	sudo chmod -R go-wx /opt/ddns-cloudflare
-	sudo chmod u+x /opt/ddns-cloudflare/ddns-cloudflare
+	sudo chmod u+x,o-wx /opt/ddns-cloudflare/ddns-cloudflare
 	```
 
-4. Ensure that `/opt/ddns-cloudflare` is added to the `PATH` environment variable (or add `/opt/bin` to `PATH` and add a symlink from there to `/opt/ddns-cloudflare/ddns-cloudflare`)
+4. [Add `/opt/ddns-cloudflare` to `PATH`](#add-optddns-cloudflare-or-optbin-to-sudo-path) (or add `/opt/bin` to `PATH` and add symlink `ln -s /opt/ddns-cloudflare/ddns-cloudflare /opt/bin/ddns-cloudflare`)
 
 ### Configure
 
-1. Create a config directory at `/etc/opt/ddns-cloudflare`
+1. Create config directory at `/etc/opt/ddns-cloudflare`
 
 2. Create the file `domains` in the config directory, containing
 	<code><pre>domains=<var>list_of_domains</var></pre></code>
@@ -31,38 +30,42 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 
 3. Ensure that only the root user has write permissions on `domains`
 
-	```bash
-	sudo chown root: /etc/opt/ddns-cloudflare/domains
-	sudo chmod go-wx /etc/opt/ddns-cloudflare/domains
-	```
-
-4. Create the file `auth` in the config directory, containing
+3. Create the file `auth` in the config directory, containing
 	<code><pre>zoneid=<var>zone_id</var>
 	authtoken=<var>api_token</var></pre></code>
 
 	The values may optionally be enclosed in single or double quotes.
 
-5. Ensure that only the root user has read or write permissions on `auth`
+4. Set permissions
 
 	```bash
-	sudo chown root: /etc/opt/ddns-cloudflare/auth
+	sudo chown root: /etc/opt/ddns-cloudflare/{auth,domains}
+	sudo chmod o-w /etc/opt/ddns-cloudflare/domains
 	sudo chmod go-rwx /etc/opt/ddns-cloudflare/auth
 	```
 
-## Run
+	Make sure that only root has read permissions on `auth` since it contains the API key
 
-Run
+## Run
 
 ```
 ddns-cloudflare
 ```
 
-Run `ddns-cloudflare -q` or `ddns-cloudflare -qq` to reduce output verbosity. Run `ddns-cloudflare -h` for more information.
+Or run `ddns-cloudflare -q` or `ddns-cloudflare -qq` to reduce output verbosity. Or run `ddns-cloudflare -h` for more information.
+
+### Options
+
+Use `-q` to only print to stdout when the DNS is changed, or when there is an error. Use `-qq` to only print to stdout when there is an error.
+
+Use <code>-w <var>time_expression</var></code> to set a tolerance period during which any errors will not be printed to stderr, where <code><var>time_expression</var></code> can be any expression recognisable by the `date` application. For example: `30min`, `'30 min'`, `'2 hours'`, `1day`.
+
+See `ddns-cloudflare --help` for more information.
 
 ### Run schedule
 
 To run the dynamic DNS updater at regular intervals, run `sudo crontab -e` and add the following
-<code><pre>*/<var>interval</var> * * * * /etc/opt/ddns-cloudflare -qq</pre></code>
+<code><pre>*/<var>interval</var> * * * * /opt/ddns-cloudflare/ddns-cloudflare -qq</pre></code>
 
 This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
 
