@@ -83,7 +83,7 @@ This runs the ddns-cloudflare service using Docker Compose.
 	sudo find ddns-cloudflare-docker/docker/{run,compose} -mindepth 1 -maxdepth 1 ! -type l -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
-3. Edit `compose.env` to set the command line arguments for `ddns-cloudflare`, and edit `.env` to set the runtime environment variables. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
+3. Edit `.env` to set the runtime environment variables. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
 
 	For email notifications, edit `ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), and ensure that the `MAIL_DOMAIN` and `MAIL_TO` environment variables are set, either in `.env` or later with `--env`.
 

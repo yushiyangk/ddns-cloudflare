@@ -7,7 +7,6 @@ services:
     image: ddns-cloudflare
     env_file:
     - .env
-    - compose.env
     init: true
     tty: true
     stdin_open: true
@@ -41,7 +40,7 @@ services:
       read_only: true
     networks:
     - network
-    command: $DDNS_CLOUDFLARE_COMPOSE_ARGS
+    command: -qq
 
 networks:
   network:
