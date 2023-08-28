@@ -17,7 +17,7 @@ services:
     - CAP_SETGID
     security_opt:
     - no-new-privileges
-    #read_only: true
+    read_only: true
     volumes:
     - type: tmpfs
       target: /etc/crontabs
