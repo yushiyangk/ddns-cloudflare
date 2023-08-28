@@ -80,7 +80,7 @@ This runs the ddns-cloudflare service using Docker Compose.
 	```
 	sudo curl -L https://codeload.github.com/yushiyangk/ddns-cloudflare/zip/refs/heads/docker -o ddns-cloudflare.zip && sudo unzip -t ddns-cloudflare.zip
 	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/{run,compose}/*
-	sudo find ddns-cloudflare-docker/docker/{run,compose} -mindepth 1 -maxdepth 1 -exec mv "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
+	sudo find ddns-cloudflare-docker/docker/{run,compose} -mindepth 1 -maxdepth 1 ! -type l -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
 3. Edit `compose.env` to set the command line arguments for `ddns-cloudflare`, and edit `.env` to set the runtime environment variables. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
