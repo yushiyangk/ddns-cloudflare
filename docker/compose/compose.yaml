@@ -40,7 +40,7 @@ services:
       read_only: true
     networks:
     - network
-    command: -qq
+    command: -qq -w 10min
 
 networks:
   network:
