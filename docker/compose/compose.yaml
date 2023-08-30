@@ -1,3 +1,4 @@
+name: ddns-cloudflare
 services:
   crond:
     build:
