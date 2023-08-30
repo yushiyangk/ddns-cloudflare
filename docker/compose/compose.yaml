@@ -30,6 +30,10 @@ services:
       target: /var/spool/cron
       tmpfs:
         mode: 0755
+    - type: tmpfs
+      target: /tmp
+      tmpfs:
+        mode: 01777
     - type: bind
       source: config
       target: /etc/opt/ddns-cloudflare
