@@ -2,20 +2,13 @@
 
 Dynamic DNS updater for Cloudflare
 
-## Install
+## Basic installation
 
 This tool depends on the packages `curl`, `findutils` and `jq`.
 
 1. Ensure that `curl`, `jq` and `xargs` (part of `findutils`) are installed and accessible on `PATH`
 
-2. Install `ddns-cloudflare` from this repository to `/opt/ddns-cloudflare/`
-
-3. Set permissions
-
-	```bash
-	sudo chown -R root: /opt/ddns-cloudflare
-	sudo chmod u+x,o-wx /opt/ddns-cloudflare/ddns-cloudflare
-	```
+2. Install the `ddns-cloudflare` executable file from this repository to `/opt/ddns-cloudflare/` and ensure that it is owned by root with permissions `u+x,o-wx`
 
 4. [Add `/opt/ddns-cloudflare` to `PATH`](#add-optddns-cloudflare-or-optbin-to-sudo-path) (or add `/opt/bin` to `PATH` and add symlink `ln -s /opt/ddns-cloudflare/ddns-cloudflare /opt/bin/ddns-cloudflare`)
 
@@ -23,30 +16,20 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 
 1. Create config directory at `/etc/opt/ddns-cloudflare`
 
-2. Create the file `domains` in the config directory, containing
+2. Create the file `/etc/opt/ddns-cloudflare/domains`, owned by root with permissions `o-w`, containing
 	<code><pre>domains=<var>list_of_domains</var></pre></code>
 
 	<code><var>list_of_domains</var></code> is a comma-separated list of domains that should be updated. The domains should be fully qualified, may contain asterisks for wildcards, and may optionally be enclosed in single or double quotes.
 
-3. Ensure that only the root user has write permissions on `domains`
-
-3. Create the file `auth` in the config directory, containing
+3. Create the file `/etc/opt/ddns-cloudflare/auth`, owned by root with permissions `go-rwx`, containing
 	<code><pre>zoneid=<var>zone_id</var>
 	authtoken=<var>api_token</var></pre></code>
 
 	The values may optionally be enclosed in single or double quotes.
 
-4. Set permissions
+	Make sure that only root has read permissions on this file as it contains the API key.
 
-	```bash
-	sudo chown root: /etc/opt/ddns-cloudflare/{auth,domains}
-	sudo chmod o-w /etc/opt/ddns-cloudflare/domains
-	sudo chmod go-rwx /etc/opt/ddns-cloudflare/auth
-	```
-
-	Make sure that only root has read permissions on `auth` since it contains the API key
-
-## Run
+### Run
 
 ```
 ddns-cloudflare
@@ -58,18 +41,18 @@ Or run `ddns-cloudflare -q` or `ddns-cloudflare -qq` to reduce output verbosity.
 
 Use `-q` to only print to stdout when the DNS is changed, or when there is an error. Use `-qq` to only print to stdout when there is an error.
 
-Use <code>-w <var>time_expression</var></code> to set a tolerance period during which any errors will not be printed to stderr, where <code><var>time_expression</var></code> can be any expression recognisable by the `date` application. For example: `30min`, `'30 min'`, `'2 hours'`, `1day`.
+Use <code>-w <var>minutes</var></code> to set a tolerance period such that errors will only be printed to stderr if they have been occuring for longer than the set period.
 
 See `ddns-cloudflare --help` for more information.
 
-### Run schedule
+### Scheduled run
 
 To run the dynamic DNS updater at regular intervals, run `sudo crontab -e` and add the following
 <code><pre>*/<var>interval</var> * * * * /opt/ddns-cloudflare/ddns-cloudflare -qq</pre></code>
 
 This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
 
-## Docker
+## Docker installation
 
 This runs the ddns-cloudflare service using Docker Compose.
 
@@ -83,11 +66,13 @@ This runs the ddns-cloudflare service using Docker Compose.
 	sudo find ddns-cloudflare-docker/docker/{run,compose} -mindepth 1 -maxdepth 1 ! -type l -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
-3. Edit `compose.env` to set the command line arguments for `ddns-cloudflare`, and edit `.env` to set the runtime environment variables. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
+3. [Configure `config/domains` and `config/auth` as above.](#configure)
+
+4. Edit `.env` to set the runtime environment variables. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
 
 	For email notifications, edit `ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), and ensure that the `MAIL_DOMAIN` and `MAIL_TO` environment variables are set, either in `.env` or later with `--env`.
 
-4. Start the service
+5. Start the service
 
 	```
 	sudo docker compose up
@@ -108,7 +93,7 @@ Check the status of the service:
 sudo service ddns-cloudflare status
 ```
 
-### Use Docker without Compose
+### Docker without Compose
 
 1. Create a working directory, e.g. at `/srv/docker/ddns-cloudflare`.
 
@@ -126,19 +111,19 @@ sudo service ddns-cloudflare status
 	sudo find ddns-cloudflare-docker/docker/run -mindepth 1 -maxdepth 1 -exec mv "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
-	[Configure the `auth` and `domains` files as above.](#configure)
+4. [Configure `config/domains` and `config/auth` as above.](#configure)
 
-4. Edit `.env` to set the runtime environment variables, or provide them later with the `--env` argument. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
+5. Edit `.env` to set the runtime environment variables, or provide them later with the `--env` argument. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
 
 	For email notifications, edit `ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), and ensure that the `MAIL_DOMAIN` and `MAIL_TO` environment variables are set, either in `.env` or later with `--env`.
 
-5. Set up network
+6. Set up network
 
 	<pre><code>sudo docker network create -t bridge <var>network_name</var></code></pre>
 
 	Set <code><var>network_name</var></code> to `ddns-cloudflare-network` unless otherwise desired.
 
-6. Run the container
+7. Run the container
 
 	<pre><code>sudo docker run -it -d --rm --init --cap-drop all --cap-add CAP_SETGID --security-opt=no-new-privileges --read-only --mount type=tmpfs,target=/etc/crontabs,tmpfs-mode=755 --mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly --mount type=bind,source=<var>working_dir</var>/ssmtp.conf,target=/etc/ssmtp/ssmtp.conf,readonly --network=<var>network_name</var> --env-file=.env --env MAIL_TO="$(grep ^root: /etc/aliases | cut -d ' ' -f 2)" --env MAIL_DOMAIN="$(cat /etc/mailname)" --name=<var>container_name</var> <var>image_name</var> <var>arguments</var></code></pre>
 

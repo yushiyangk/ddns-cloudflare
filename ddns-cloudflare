@@ -23,12 +23,12 @@ help="$help\nOptions:"
 help="$help\n  -q, --quiet     Use once to disable printing unchanged domains to stdout"
 help="$help\n                  Use twice to disable printing all status to stdout status"
 help="$help\n                  Error messages will always be printed to stderr"
-help="$help\n  -w <time>, --warn=<time>, --warn-after=<time>"
-help="$help\n                  Do not print to stderr for DNS update failures unless it has failed consistently for the period of <time>"
+help="$help\n  -w <minutes>, --warn=<minutes>, --warn-after=<minutes>"
+help="$help\n                  Do not print to stderr for DNS update failures unless it has failed consistently for <minutes>"
 help="$help\n  -h, -?, --help  Display this help message and exit"
 
 quiet=0
-warnafter=
+warn_after=
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -39,16 +39,16 @@ while [ $# -gt 0 ]; do
 		--quiet) ((++quiet)) ;;
 		--warn*)
 			case "$1" in
-				*=*) warnafter="${1#*=}" ;;
+				*=*) warn_after="${1#*=}" ;;
 				*)
 					case "$2" in
 						-*) ;;
 						*)
-							warnafter="$2"
+							warn_after="$2"
 							shift
 					esac
 			esac
-			if [ -z "$warnafter" ]; then
+			if [ -z "$warn_after" ]; then
 				echo "$name: missing required argument for option '$1'" >& 2
 				exit 2
 			fi
@@ -67,16 +67,16 @@ while [ $# -gt 0 ]; do
 						;;
 					q) ((++quiet)) ;;
 					w)
-						warnafter="${1:$((i + 1))}"
-						if [ -z "$warnafter" ]; then
+						warn_after="${1:$((i + 1))}"
+						if [ -z "$warn_after" ]; then
 							case "$2" in
 								-*) ;;
 								*)
-									warnafter="$2"
+									warn_after="$2"
 									shift
 							esac
 						fi
-						if [ -z "$warnafter" ]; then
+						if [ -z "$warn_after" ]; then
 							echo "$name: missing required argument for option '$flag'" >& 2
 							exit 2
 						fi
@@ -95,35 +95,39 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
+if [ -n "$warn_after" ]; then
+	# Convert minutes to seconds
+	warn_after=$((warn_after * 10))
+	warn_threshold=$(date -d @"$(($(date +%s) - warn_after))" +%s)
+fi
 
-export DDNS_CLOUDFLARE_CONFIG_DIR='/etc/opt/ddns-cloudflare'
+
+config_dir='/etc/opt/ddns-cloudflare'
 
 # auth
-zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_CONFIG_DIR/auth" | xargs -n 1 )"
-authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_CONFIG_DIR/auth" | xargs -n 1 )"
+zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$config_dir/auth" | xargs -n 1 )"
+authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$config_dir/auth" | xargs -n 1 )"
 # domains
-IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$DDNS_CLOUDFLARE_CONFIG_DIR/domains" | xargs -d ',' -n 1 | xargs -l ) )
-
-unset DDNS_CLOUDFLARE_CONFIG_DIR
+IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$config_dir/domains" | xargs -d ',' -n 1 | xargs -l ) )
 
 
 publicip="$( curl -s checkip.dyndns.org | cut -d ':' -f 2 | cut -d '<' -f 1 | cut -d ' ' -f 2 )"
 
 if [ -z "$publicip" ]; then
 	error=1
-	if [ -z "$warnafter" ]; then
+	if [ -z "$warn_threshold" ]; then
 		echo "$name: failed to detect IP address" >& 2
 	else
 		if [ -f /tmp/ddns-cloudflare.first-error ]; then
-			if [ $(date -d -"$warnafter" +%s) -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
+			if [ $warn_threshold -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
 				echo "$name: failed to detect IP address" >& 2
-				echo "$name: failing since $(date -d -"$warnafter" -R)" >& 2
+				echo "$name: failing since $(date -d @"$(cat /tmp/ddns-cloudflare.first-error)" -R)" >& 2
 			fi
 		else
 			date +%s > /tmp/ddns-cloudflare.first-error
 		fi
 	fi
-	exit 1
+	exit $error
 else
 	if [ $quiet -le 0 ]; then
 		echo -e "Detected IP address from \e[94mcheckip.dyndns.org\e[39m: \e[97m$publicip\e[39m"
@@ -132,7 +136,8 @@ fi
 
 
 error=0
-delayederrorprint=0
+delayed_print_error=0
+
 for i in "${names[@]}"; do
 	response="$( curl -s -X GET 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records?type=A&name='"${i}" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" )"
 	recordip="$( echo "$response" | jq -Mr '.result[0].content' )"
@@ -153,16 +158,16 @@ for i in "${names[@]}"; do
 			if [ $quiet -le 1 ]; then
 				echo -e "\e[31m$code: \e[97m${i}\e[31m failed to update\e[39m"
 			fi
-			if [ -z "$warnafter" ]; then
+			if [ -z "$warn_threshold" ]; then
 				echo -n "$name: " >& 2
 				cat /tmp/ddns-cloudflare.response >& 2
 			else
 				if [ -f /tmp/ddns-cloudflare.first-error ]; then
-					if [ $(date -d -"$warnafter" +%s) -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
+					if [ $warn_threshold -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
 						echo -n "$name: " >& 2
 						cat /tmp/ddns-cloudflare.response >& 2
 						echo "" >& 2
-						delayederrorprint=1
+						delayed_print_error=1
 					fi
 				else
 					date +%s > /tmp/ddns-cloudflare.first-error
@@ -177,11 +182,11 @@ for i in "${names[@]}"; do
 	fi
 done
 
-if [ $delayederrorprint -ne 0 ]; then
-	echo "$name: failing since $(date -d -"$warnafter" -R)" >& 2
+if [ $delayed_print_error -ne 0 ]; then
+	echo "$name: failing since $(date -d @"$(cat /tmp/ddns-cloudflare.first-error)" -R)" >& 2
 fi
 if [ $error -ne 0 ]; then
-	exit 1
+	exit $error
 else
 	if [ -f /tmp/ddns-cloudflare.first-error ]; then
 		rm /tmp/ddns-cloudflare.first-error
