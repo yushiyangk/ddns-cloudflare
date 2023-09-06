@@ -36,8 +36,8 @@ services:
         target: /etc/ssmtp/ssmtp.conf
         read_only: true
     networks:
-    - network
-    command: -qq -w 10
+      - network
+    command: -qq -w 15
 
 networks:
   network:
