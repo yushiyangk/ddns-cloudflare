@@ -54,11 +54,11 @@ This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
 
 ## Docker installation
 
-This runs the ddns-cloudflare service using Docker Compose.
+Run ddns-cloudflare using Docker Compose:
 
-1. Create a working directory, e.g. at `/srv/docker/ddns-cloudflare`.
+1. Create the working directory at `/srv/docker/ddns-cloudflare`.
 
-2. Copy the contents of `docker/run` from the repository into the working directory, either manually or by running
+2. Copy the contents of `docker/run` from this repository to the working directory, either manually or by running
 
 	```
 	sudo curl -L https://codeload.github.com/yushiyangk/ddns-cloudflare/zip/refs/heads/docker -o ddns-cloudflare.zip && sudo unzip -t ddns-cloudflare.zip
@@ -66,19 +66,24 @@ This runs the ddns-cloudflare service using Docker Compose.
 	sudo find ddns-cloudflare-docker/docker/{run,compose} -mindepth 1 -maxdepth 1 ! -type l -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
-3. [Configure `config/domains` and `config/auth` as above.](#configure)
+### Configure
 
-4. Edit `.env` to set the runtime environment variables. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
+1. [Configure `config/domains` and `config/auth` as above.](#configure)
 
-	For email notifications, edit `ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), and ensure that the `MAIL_DOMAIN` and `MAIL_TO` environment variables are set, either in `.env` or later with `--env`.
+2. Edit `.env` to set `DDNS_CLOUDFLARE_INTERVAL_MINS`, which determines how frequently the DNS updates will be attempted, in minutes. This should optimally be a number that divides 60 (since it is used as a divisor for cron).
 
-5. Start the service
+3. If email notifications are required, edit `cron/ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), then set the following values in `.env`:
+
+	- **MAIL_DOMAIN**: The fully-qualified domain name that mail should be sent from (not including username)
+	- **MAIL_TO**: The recepient address (including username)
+
+### Run
 
 	```
 	sudo docker compose up
 	```
 
-### Start service on boot
+### Start as service on boot
 
 Install the Systemd unit file and enable the service:
 
@@ -113,9 +118,7 @@ sudo service ddns-cloudflare status
 
 4. [Configure `config/domains` and `config/auth` as above.](#configure)
 
-5. Edit `.env` to set the runtime environment variables, or provide them later with the `--env` argument. `DDNS_CLOUDFLARE_PERIOD` determines how frequently the DNS updates will be attempted, in minutes, and should optimally be a number that divides 60 (as it is used to configure a crontab).
-
-	For email notifications, edit `ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), and ensure that the `MAIL_DOMAIN` and `MAIL_TO` environment variables are set, either in `.env` or later with `--env`.
+5. [Configure `.env` (and `ssmtp.conf`) as above.](#configure-1)
 
 6. Set up network
 
@@ -127,9 +130,9 @@ sudo service ddns-cloudflare status
 
 	<pre><code>sudo docker run -it -d --rm --init --cap-drop all --cap-add CAP_SETGID --security-opt=no-new-privileges --read-only --mount type=tmpfs,target=/etc/crontabs,tmpfs-mode=755 --mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly --mount type=bind,source=<var>working_dir</var>/ssmtp.conf,target=/etc/ssmtp/ssmtp.conf,readonly --network=<var>network_name</var> --env-file=.env --env MAIL_TO="$(grep ^root: /etc/aliases | cut -d ' ' -f 2)" --env MAIL_DOMAIN="$(cat /etc/mailname)" --name=<var>container_name</var> <var>image_name</var> <var>arguments</var></code></pre>
 
-	Set <code><var>container_name</var></code> to `ddns-cloudflare` unless otherwise desired. Note that <code><var>working_dir</var></code> is the current working directory and must be an absolute path, and that <code><var>arguments</var></code> are the arguments for `ddns-cloudflare`.
+	This sets `MAIL_DOMAIN` to the same fully qualified host name of the host and sets `MAIL_TO` to the same address that the host forwards all root mail to. These override the settings in `.env`, if any. Alternatively, they can be omitted to use the settings in `.env`.
 
-	This sets `MAIL_DOMAIN` to the same as the host and sets `MAIL_TO` to the address that the host forwards all root mail to. These override the settings in `.env` if any. Alternatively, they can be omitted to use the settings in `.env`.
+	Set <code><var>container_name</var></code> to `ddns-cloudflare` unless otherwise desired. Note that <code><var>working_dir</var></code> is the current working directory and must be an absolute path, and that <code><var>arguments</var></code> are the arguments for `ddns-cloudflare`.
 
 	Add `-d` before the <code><var>image_name</var></code> to run the container in the background.
 
