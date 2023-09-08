@@ -1,8 +1,10 @@
 #!/bin/sh
 
-# Restore writeable volumes
-cp -a /etc/default-crontabs/* /etc/crontabs
-cp -a /var/spool/default-cron/* /var/spool/cron
+# Restore writeable files
+cp -a /default/* /container
+
+# Set time zone
+ln -s /usr/share/zoneinfo/"$(cat /etc/timezone)" /container/etc/localtime
 
 
 echo "root:ddns-cloudflare@$MAIL_DOMAIN" > /etc/ssmtp/revaliases

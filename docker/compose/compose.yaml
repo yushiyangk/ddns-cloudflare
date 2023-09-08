@@ -20,13 +20,7 @@ services:
     read_only: true
     volumes:
       - type: tmpfs
-        target: /etc/crontabs
-      - type: tmpfs
-        target: /etc/ssmtp
-      - type: tmpfs
-        target: /var/spool/cron
-      - type: tmpfs
-        target: /tmp
+        target: /container
       - type: bind
         source: ddns-cloudflare/config
         target: /etc/opt/ddns-cloudflare

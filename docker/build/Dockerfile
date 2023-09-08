@@ -12,8 +12,18 @@ RUN apk update && \
 
 COPY --link --chmod=544 docker/build/entrypoint.sh ddns-cloudflare ./
 
-RUN mv /etc/crontabs /etc/default-crontabs && mkdir -m 755 /etc/crontabs && \
-	mv /var/spool/cron /var/spool/default-cron && mkdir -m 755 /var/spool/cron
+RUN mkdir -m 755 /default && \
+	mkdir -m 755 /default/etc && \
+	mkdir -m 755 /default/var && \
+	mkdir -m 755 /default/var/spool && \
+	mkdir -m 755 /container && \
+	mv /etc/crontabs /default/etc/crontabs && ln -s /container/etc/crontabs /etc/crontabs && \
+	mv /etc/ssmtp /default/etc/ssmtp && ln -s /container/etc/ssmtp /etc/ssmtp && \
+	mv /var/spool/cron /default/var/spool/cron && ln -s /container/var/spool/cron /var/spool/cron && \
+	ln -s /container/etc/localtime /etc/localtime && \
+	mkdir -m 755 /etc/opt && \
+	mkdir -m 755 /etc/opt/ddns-cloudflare && \
+	touch /etc/timezone && chmod 644 /etc/timezone
 
 # tmpfs
 VOLUME /etc/crontabs
@@ -23,5 +33,6 @@ VOLUME /var/spool/cron
 # bind
 VOLUME /etc/opt/ddns-cloudflare
 VOLUME /etc/ssmtp/ssmtp.conf
+VOLUME /etc/timezone
 
 ENTRYPOINT ["entrypoint.sh"]
