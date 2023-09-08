@@ -7,7 +7,7 @@ services:
       pull: true
     image: ddns-cloudflare
     env_file:
-      - .env
+      - env
     init: true
     tty: true
     stdin_open: true
@@ -28,6 +28,10 @@ services:
       - type: bind
         source: ddns-cloudflare/ssmtp.conf
         target: /etc/ssmtp/ssmtp.conf
+        read_only: true
+      - type: bind
+        source: timezone
+        target: /etc/timezone
         read_only: true
     networks:
       - network

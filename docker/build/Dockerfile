@@ -21,7 +21,6 @@ RUN mkdir -m 755 /default && \
 	mv /etc/ssmtp /default/etc/ssmtp && ln -s /container/etc/ssmtp /etc/ssmtp && \
 	mv /var/spool/cron /default/var/spool/cron && ln -s /container/var/spool/cron /var/spool/cron && \
 	ln -s /container/etc/localtime /etc/localtime && \
-	mkdir -m 755 /etc/opt && \
 	mkdir -m 755 /etc/opt/ddns-cloudflare && \
 	touch /etc/timezone && chmod 644 /etc/timezone
 
