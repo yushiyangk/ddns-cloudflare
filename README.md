@@ -62,26 +62,28 @@ Run ddns-cloudflare using Docker Compose:
 
 	```
 	sudo curl -L https://codeload.github.com/yushiyangk/ddns-cloudflare/zip/refs/heads/docker -o ddns-cloudflare.zip && sudo unzip -t ddns-cloudflare.zip
-	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/{run,compose}/*
-	sudo find ddns-cloudflare-docker/docker/{run,compose} -mindepth 1 -maxdepth 1 ! -type l -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
+	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/{run,compose}/* && sudo find ddns-cloudflare-docker/docker/compose -type l -exec sh -c 'file="$(readlink -f "{}")" && rm -r "{}" && cp -a "$file" "{}" && echo "Reified {}"' \;
+	sudo find ddns-cloudflare-docker/docker/compose -mindepth 1 -maxdepth 1 -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
 ### Configure
 
 1. [Configure `config/domains` and `config/auth` as above.](#configure)
 
-2. Edit `.env` to set `DDNS_CLOUDFLARE_INTERVAL_MINS`, which determines how frequently the DNS updates will be attempted, in minutes. This should optimally be a number that divides 60 (since it is used as a divisor for cron).
+2. Edit `env` to set `DDNS_CLOUDFLARE_INTERVAL_MINS`, which determines how frequently the DNS updates will be attempted, in minutes. This should optimally be a number that divides 60 (since it is used as a divisor for cron).
 
-3. If email notifications are required, edit `cron/ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), then set the following values in `.env`:
+3. If email notifications are required, edit `cron/ssmtp.conf` to point it to the mail server with [the appropriate settings](https://wiki.archlinux.org/title/SSMTP), then set the following values in `env`:
 
 	- **MAIL_DOMAIN**: The fully-qualified domain name that mail should be sent from (not including username)
 	- **MAIL_TO**: The recepient address (including username)
 
+4. Set the time zone by editing `timezone` to the appropriate [tz identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones), or set it to be the same as the host by running `sudo rm timezone && sudo ln -s /etc/timezone timezone`.
+
 ### Run
 
-	```
-	sudo docker compose up
-	```
+```
+sudo docker compose up
+```
 
 ### Start as service on boot
 
@@ -118,7 +120,7 @@ sudo service ddns-cloudflare status
 
 4. [Configure `config/domains` and `config/auth` as above.](#configure)
 
-5. [Configure `.env` (and `ssmtp.conf`) as above.](#configure-1)
+5. [Configure `env` (and `ssmtp.conf` and `timezone`) as above.](#configure-1)
 
 6. Set up network
 
@@ -128,9 +130,9 @@ sudo service ddns-cloudflare status
 
 7. Run the container
 
-	<pre><code>sudo docker run -it -d --rm --init --cap-drop all --cap-add CAP_SETGID --security-opt=no-new-privileges --read-only --mount type=tmpfs,target=/etc/crontabs,tmpfs-mode=755 --mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly --mount type=bind,source=<var>working_dir</var>/ssmtp.conf,target=/etc/ssmtp/ssmtp.conf,readonly --network=<var>network_name</var> --env-file=.env --env MAIL_TO="$(grep ^root: /etc/aliases | cut -d ' ' -f 2)" --env MAIL_DOMAIN="$(cat /etc/mailname)" --name=<var>container_name</var> <var>image_name</var> <var>arguments</var></code></pre>
+	<pre><code>sudo docker run -it -d --rm --init --cap-drop all --cap-add CAP_SETGID --security-opt=no-new-privileges --read-only --mount type=tmpfs,target=/container --mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly --mount type=bind,source=<var>working_dir</var>/ssmtp.conf,target=/etc/ssmtp/ssmtp.conf,readonly --network=<var>network_name</var> --env-file=env --env MAIL_TO="$(grep ^root: /etc/aliases | cut -d ' ' -f 2)" --env MAIL_DOMAIN="$(cat /etc/mailname)" --name=<var>container_name</var> <var>image_name</var> <var>arguments</var></code></pre>
 
-	This sets `MAIL_DOMAIN` to the same fully qualified host name of the host and sets `MAIL_TO` to the same address that the host forwards all root mail to. These override the settings in `.env`, if any. Alternatively, they can be omitted to use the settings in `.env`.
+	This sets `MAIL_DOMAIN` to the same fully qualified host name of the host and sets `MAIL_TO` to the same address that the host forwards all root mail to. These override the settings in `env`, if any. Alternatively, they can be omitted to use the settings in `env`.
 
 	Set <code><var>container_name</var></code> to `ddns-cloudflare` unless otherwise desired. Note that <code><var>working_dir</var></code> is the current working directory and must be an absolute path, and that <code><var>arguments</var></code> are the arguments for `ddns-cloudflare`.
 
