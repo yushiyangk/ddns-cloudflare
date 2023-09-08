@@ -25,9 +25,8 @@ RUN mkdir -m 755 /default && \
 	touch /etc/timezone && chmod 644 /etc/timezone
 
 # tmpfs
-VOLUME /etc/crontabs
-VOLUME /etc/ssmtp
-VOLUME /var/spool/cron
+VOLUME /container
+VOLUME /tmp
 
 # bind
 VOLUME /etc/opt/ddns-cloudflare

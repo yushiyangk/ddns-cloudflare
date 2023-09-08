@@ -21,6 +21,8 @@ services:
     volumes:
       - type: tmpfs
         target: /container
+      - type: tmpfs
+        target: /tmp
       - type: bind
         source: ddns-cloudflare/config
         target: /etc/opt/ddns-cloudflare
