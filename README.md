@@ -62,8 +62,8 @@ Run ddns-cloudflare using Docker Compose:
 
 	```
 	sudo curl -L https://codeload.github.com/yushiyangk/ddns-cloudflare/zip/refs/heads/docker -o ddns-cloudflare.zip && sudo unzip -t ddns-cloudflare.zip
-	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/{run,compose}/*
-	sudo find ddns-cloudflare-docker/docker/{run,compose} -mindepth 1 -maxdepth 1 ! -type l -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
+	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/{run,compose}/* && sudo find ddns-cloudflare-docker/docker/compose -type l -exec sh -c 'file="$(readlink -f "{}")" && rm -r "{}" && cp -a "$file" "{}" && echo "Reified {}"' \;
+	sudo find ddns-cloudflare-docker/docker/compose -mindepth 1 -maxdepth 1 -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
 ### Configure
