@@ -97,7 +97,7 @@ done
 
 if [ -n "$warn_after" ]; then
 	# Convert minutes to seconds
-	warn_after=$((warn_after * 10))
+	warn_after=$((warn_after * 60))
 	warn_threshold=$(date -d @"$(($(date +%s) - warn_after))" +%s)
 fi
 
