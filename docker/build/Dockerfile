@@ -8,7 +8,7 @@ WORKDIR /opt/ddns-cloudflare
 ARG cache_date
 RUN apk update && \
 	apk upgrade --no-cache --no-interactive && \
-	apk add --no-cache --no-interactive bash curl findutils jq ssmtp
+	apk add --no-cache --no-interactive tzdata bash curl findutils jq ssmtp
 
 COPY --link --chmod=544 docker/build/entrypoint.sh ddns-cloudflare ./
 
