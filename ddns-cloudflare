@@ -122,6 +122,7 @@ if [ -z "$publicip" ]; then
 			if [ $warn_threshold -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
 				echo "$name: failed to detect IP address" >& 2
 				echo "$name: failing since $(date -d @"$(cat /tmp/ddns-cloudflare.first-error)" -R)" >& 2
+				rm /tmp/ddns-cloudflare.first-error
 			fi
 		else
 			date +%s > /tmp/ddns-cloudflare.first-error
@@ -184,6 +185,7 @@ done
 
 if [ $delayed_print_error -ne 0 ]; then
 	echo "$name: failing since $(date -d @"$(cat /tmp/ddns-cloudflare.first-error)" -R)" >& 2
+	rm /tmp/ddns-cloudflare.first-error
 fi
 if [ $error -ne 0 ]; then
 	exit $error
