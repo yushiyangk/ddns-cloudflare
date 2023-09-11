@@ -24,11 +24,11 @@ services:
       - type: tmpfs
         target: /tmp
       - type: bind
-        source: ddns-cloudflare/config
+        source: cron/ddns-cloudflare
         target: /etc/opt/ddns-cloudflare
         read_only: true
       - type: bind
-        source: ddns-cloudflare/ssmtp.conf
+        source: cron/ssmtp.conf
         target: /etc/ssmtp/ssmtp.conf
         read_only: true
       - type: bind
