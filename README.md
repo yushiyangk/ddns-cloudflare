@@ -17,13 +17,13 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 1. Create config directory at `/etc/opt/ddns-cloudflare`
 
 2. Create the file `/etc/opt/ddns-cloudflare/domains`, owned by root with permissions `o-w`, containing
-	<code><pre>domains=<var>list_of_domains</var></pre></code>
+	<pre><code>domains=<var>list_of_domains</var></code></pre>
 
 	<code><var>list_of_domains</var></code> is a comma-separated list of domains that should be updated. The domains should be fully qualified, may contain asterisks for wildcards, and may optionally be enclosed in single or double quotes.
 
 3. Create the file `/etc/opt/ddns-cloudflare/auth`, owned by root with permissions `go-rwx`, containing
-	<code><pre>zoneid=<var>zone_id</var>
-	authtoken=<var>api_token</var></pre></code>
+	<pre><code>zoneid=<var>zone_id</var>
+	authtoken=<var>api_token</var></code></pre>
 
 	The values may optionally be enclosed in single or double quotes.
 
@@ -48,7 +48,7 @@ See `ddns-cloudflare --help` for more information.
 ### Scheduled run
 
 To run the dynamic DNS updater at regular intervals, run `sudo crontab -e` and add the following
-<code><pre>*/<var>interval</var> * * * * /opt/ddns-cloudflare/ddns-cloudflare -qq</pre></code>
+<pre><code>*/<var>interval</var> * * * * /opt/ddns-cloudflare/ddns-cloudflare -qq</code></pre>
 
 This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
 
