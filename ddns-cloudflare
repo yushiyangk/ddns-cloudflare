@@ -111,7 +111,7 @@ authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$config_dir/auth" | x
 IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$config_dir/domains" | xargs -d ',' -n 1 | xargs -l ) )
 
 
-publicip="$( curl -s checkip.dyndns.org | cut -d ':' -f 2 | cut -d '<' -f 1 | cut -d ' ' -f 2 )"
+publicip="$( curl -s https://ifconfig.me/ip )"
 
 if [ -z "$publicip" ]; then
 	error=1
