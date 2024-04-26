@@ -58,17 +58,17 @@ Run ddns-cloudflare using Docker Compose:
 
 1. Create the working directory at `/srv/docker/ddns-cloudflare`.
 
-2. Copy the contents of `docker/run` from this repository to the working directory, either manually or by running
+2. Copy the contents of `docker/compose` from this repository to the working directory, either manually or by running
 
 	```
 	sudo curl -L https://codeload.github.com/yushiyangk/ddns-cloudflare/zip/refs/heads/docker -o ddns-cloudflare.zip && sudo unzip -t ddns-cloudflare.zip
-	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/{run,compose}/* && sudo find ddns-cloudflare-docker/docker/compose -type l -exec sh -c 'file="$(readlink -f "{}")" && rm -r "{}" && cp -a "$file" "{}" && echo "Reified {}"' \;
+	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/compose/*
 	sudo find ddns-cloudflare-docker/docker/compose -mindepth 1 -maxdepth 1 -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
 	```
 
 ### Configure
 
-1. [Configure `config/domains` and `config/auth` as above.](#configure)
+1. [Configure `cron/ddns-cloudflare/domains` and `cron/ddns-cloudflare/auth` as above.](#configure)
 
 2. Edit `env` to set `DDNS_CLOUDFLARE_INTERVAL_MINS`, which determines how frequently the DNS updates will be attempted, in minutes. This should optimally be a number that divides 60 (since it is used as a divisor for cron).
 
@@ -77,9 +77,11 @@ Run ddns-cloudflare using Docker Compose:
 	- **MAIL_DOMAIN**: The fully-qualified domain name that mail should be sent from (not including username)
 	- **MAIL_TO**: The recepient address (including username)
 
-4. Set the time zone by editing `timezone` to the appropriate [tz identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones), or set it to be the same as the host by running `sudo rm timezone && sudo ln -s /etc/timezone timezone`.
+4. Set the time zone by editing `timezone` to the appropriate [tz identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Alternatively, set it to be the same as the host by symlinking it to `/etc/timezone`, by running `sudo rm timezone && sudo ln -s /etc/timezone timezone`.
 
 ### Run
+
+In the working directory, run
 
 ```
 sudo docker compose up
