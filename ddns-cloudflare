@@ -17,7 +17,7 @@
 
 name="ddns-cloudflare"
 
-help="Usage: ddns-cloudflare [-qh] [<options>]"
+help="Usage: $name [-qh] [<options>]"
 help="$help\n"
 help="$help\nOptions:"
 help="$help\n  -q, --quiet     Use once to disable printing unchanged domains to stdout"
