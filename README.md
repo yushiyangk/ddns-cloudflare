@@ -149,24 +149,24 @@ sudo service ddns-cloudflare status
 
 	This will automatically fetch the latest 1.x release and build it. The build argument `cach_date` invalidates the build cache at the end of each day, so that the packages installed from the distribution are up to date with the latest fixes. Set <code><var>image_name</var></code> to `ddns-cloudflare` unless otherwise desired.
 
-3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> release file and extract it to `/srv/docker/ddns-cloudflare`
+3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> release file and extract it to the working directory
 
 	This can be done on the command-line with
 
 	```sh
-	curl -s https://api.github.com/repos/yushiyangk/ddns-cloudflare/releases/latest | grep -F ddns-cloudflare-1. | grep -F docker-run.zip | grep -F browser_download_url | head -n 1 | cut -d ':' -f 2- | tr -d '"' | sudo wget -q -i - -P /srv/docker/ddns-cloudflare/  # Download latest 1.x release
-	sudo unzip /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-run.zip -d /srv/docker/ddns-cloudflare/
-	sudo rm /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-run.zip
+	curl -s https://api.github.com/repos/yushiyangk/ddns-cloudflare/releases/latest | grep -F ddns-cloudflare-1. | grep -F docker-run.zip | grep -F browser_download_url | head -n 1 | cut -d ':' -f 2- | tr -d '"' | wget -q -i -  # Download latest 1.x release
+	unzip ddns-cloudflare-*-docker-run.zip
+	rm ddns-cloudflare-*-docker-run.zip
 	```
 
 	If a previous version is already installed, you will be prompted to replace the existing files. Be careful not to clobber the existing `env`.
 
-4. [Configure `config/domains` and `config/auth` as above.](#configure), except that the config directory is **`/srv/docker/ddns-cloudflare/config`** instead of `/etc/opt/ddns-cloudflare`. An example DNS zone is provided and should be edited.
+4. [Configure `config/domains` and `config/auth` as above.](#configure), except that the config directory is <b><code><var>working_dir</var>/config</code></b> instead of `/etc/opt/ddns-cloudflare`. An example DNS zone is provided and should be edited.
 
 	Alternatively, an existing config at `/etc/opt/ddns-cloudflare` can be used by symlinking to it
 	```
-	sudo rm -r /srv/docker/ddns-cloudflare/config
-	sudo ln -s /etc/opt/ddns-cloudflare /srv/docker/ddns-cloudflare/config
+	rm -r config
+	ln -s /etc/opt/ddns-cloudflare config
 	```
 
 5. [Configure `env` (and `ssmtp.conf` and `timezone`) as above.](#configure-1)
@@ -175,7 +175,7 @@ sudo service ddns-cloudflare status
 
 	<pre><code>sudo docker network create -t bridge <var>network_name</var></code></pre>
 
-	Set <code><var>network_name</var></code> to `ddns-cloudflare-network` unless otherwise desired.
+	Set <code><var>network_name</var></code> to `ddns-cloudflare-bridge` unless otherwise desired.
 
 7. Run the container
 
