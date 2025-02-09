@@ -89,7 +89,13 @@ To install ddns-cloudflare for Docker Compose:
 
 ### Configure
 
-1. [Configure `cron/ddns-cloudflare/domains` and `cron/ddns-cloudflare/auth` as above.](#configure)
+1. [Configure `cron/ddns-cloudflare/domains` and `cron/ddns-cloudflare/auth` as above](#configure), except that the config directory is **`/srv/docker/ddns-cloudflare/cron/ddns-cloudflare`** instead of `/etc/opt/ddns-cloudflare`.
+
+	Alternatively, an existing config at `/etc/opt/ddns-cloudflare` can be used by symlinking to it
+	```
+	sudo rm -r /srv/docker/ddns-cloudflare/cron/ddns-cloudflare
+	sudo ln -s /etc/opt/ddns-cloudflare /srv/docker/ddns-cloudflare/cron/ddns-cloudflare
+	```
 
 2. Edit `env` to set `DDNS_CLOUDFLARE_INTERVAL_MINS`, which determines how frequently the DNS updates will be attempted, in minutes. This should optimally be a number that divides 60 (since it is used as a divisor for cron).
 
@@ -98,7 +104,13 @@ To install ddns-cloudflare for Docker Compose:
 	- **MAIL_DOMAIN**: The fully-qualified domain name that mail should be sent from (not including username)
 	- **MAIL_TO**: The recepient address (including username)
 
-4. Set the time zone by editing `timezone` to the appropriate [tz identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Alternatively, set it to be the same as the host by symlinking it to `/etc/timezone`, by running `sudo rm timezone && sudo ln -s /etc/timezone timezone`.
+4. Set the time zone by editing `timezone` to the appropriate [tz identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+
+	Alternatively, set it to be the same as the host by symlinking it to `/etc/timezone`
+	```
+	sudo rm /srv/docker/ddns-cloudflare/timezone
+	sudo ln -s /etc/timezone /srv/docker/ddns-cloudflare/timezone
+	```
 
 ### Run
 
@@ -149,7 +161,13 @@ sudo service ddns-cloudflare status
 
 	If a previous version is already installed, you will be prompted to replace the existing files. Be careful not to clobber the existing `env`.
 
-4. [Configure `config/domains` and `config/auth` as above.](#configure)
+4. [Configure `config/domains` and `config/auth` as above.](#configure), except that the config directory is **`/srv/docker/ddns-cloudflare/config`** instead of `/etc/opt/ddns-cloudflare`.
+
+	Alternatively, an existing config at `/etc/opt/ddns-cloudflare` can be used by symlinking to it
+	```
+	sudo rm -r /srv/docker/ddns-cloudflare/config
+	sudo ln -s /etc/opt/ddns-cloudflare /srv/docker/ddns-cloudflare/config
+	```
 
 5. [Configure `env` (and `ssmtp.conf` and `timezone`) as above.](#configure-1)
 
