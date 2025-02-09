@@ -8,26 +8,45 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 
 1. Ensure that `curl`, `jq` and `xargs` (part of `findutils`) are installed and accessible on `PATH`
 
-2. Install the `ddns-cloudflare` executable file from this repository to `/opt/ddns-cloudflare/` and ensure that it is owned by root with permissions `u+x,o-wx`
+2. Download the <code>ddns-cloudflare-<var>version</var>-bash.zip</code> release file and extract the `ddns-cloudflare` executable to `/opt/ddns-cloudflare/`
+
+3. Ensure that `/opt/ddns-cloudflare/ddns-cloudflare` is owned by root and has permissions `'u+x,o-wx`
 
 4. [Add `/opt/ddns-cloudflare` to `PATH`](#add-optddns-cloudflare-or-optbin-to-sudo-path) (or add `/opt/bin` to `PATH` and add symlink `ln -s /opt/ddns-cloudflare/ddns-cloudflare /opt/bin/ddns-cloudflare`)
 
 ### Configure
 
-1. Create config directory at `/etc/opt/ddns-cloudflare`
+1. Create the config directory at `/etc/opt/ddns-cloudflare`
 
-2. Create the file `/etc/opt/ddns-cloudflare/domains`, owned by root with permissions `o-w`, containing
-	<pre><code>domains=<var>list_of_domains</var></code></pre>
+2. For each separate DNS zone that should be updated,
 
-	<code><var>list_of_domains</var></code> is a comma-separated list of domains that should be updated. The domains should be fully qualified, may contain asterisks for wildcards, and may optionally be enclosed in single or double quotes.
+	1. Create a subdirectory at <code>/etc/opt/ddns-cloudflare/<var>zone_name</var></code>, e.g. <code>/etc/opt/ddns-cloudflare/example.com</code>.
 
-3. Create the file `/etc/opt/ddns-cloudflare/auth`, owned by root with permissions `go-rwx`, containing
-	<pre><code>zoneid=<var>zone_id</var>
-	authtoken=<var>api_token</var></code></pre>
+		The <code><var>zone_name</var></code> is typically the domain name of the zone, but it does not have to be.
 
-	The values may optionally be enclosed in single or double quotes.
+	2. Create the file <code>/etc/opt/ddns-cloudflare/<var>zone_name</var>/domains</code>`, owned by root with permissions `o-w`, containing
+		<pre><code>domains=<var>list_of_domains</var></code></pre>
 
-	Make sure that only root has read permissions on this file as it contains the API key.
+		<code><var>list_of_domains</var></code> is a comma-separated list of domains that should be updated. Each of the domains should be fully qualified, may contain asterisks for wildcards, and may optionally be enclosed in single or double quotes.
+
+		For example,
+		```
+		domains='example.com', 'subdomain.example.com', '*.wildcard.example.com'
+		```
+
+		**Note:** Each of these domains must already have an A record present in Cloudflare DNS. If they are not, first manually add the corresponding A records with an arbitrary dummy IP address, such as `0.0.0.0`. Otherwise, the update operation will fail.
+
+	3. Create the file <code>/etc/opt/ddns-cloudflare/<var>zone_name</var>/auth</code>, owned by root with permissions `go-rwx`, containing
+		<pre><code>zoneid=<var>zone_id</var>
+		authtoken=<var>api_token</var></code></pre>
+
+		The values may optionally be enclosed in single or double quotes.
+
+		**Warning:** Make sure that only root has read permissions on this file as it contains the API key.
+
+#### Backwards compatibility with single-zone config
+
+For backwards compatibility, the config files at `/etc/opt/ddns-cloudflare/domain` and `/etc/opt/ddns-cloudflare/auth` will also be treated as a separate DNS zone, with an implicit <code><var>zone_name</var></code> of `(default)`. New installations should avoid using this behaviour as it is likely to be deprecated in the future.
 
 ### Run
 
@@ -56,7 +75,7 @@ This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
 
 To install ddns-cloudflare for Docker Compose:
 
-1. Download the <code>ddns-cloudflare-<var>version</var>-docker-compose.zip</code> file and extract it to `/srv/docker/ddns-cloudflare`
+1. Download the <code>ddns-cloudflare-<var>version</var>-docker-compose.zip</code> release file and extract it to `/srv/docker/ddns-cloudflare`
 
 	This can be done on the command-line with
 
@@ -118,7 +137,7 @@ sudo service ddns-cloudflare status
 
 	This will automatically fetch the latest 1.x release and build it. The build argument `cach_date` invalidates the build cache at the end of each day, so that the packages installed from the distribution are up to date with the latest fixes. Set <code><var>image_name</var></code> to `ddns-cloudflare` unless otherwise desired.
 
-3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> file and extract it to `/srv/docker/ddns-cloudflare`
+3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> release file and extract it to `/srv/docker/ddns-cloudflare`
 
 	This can be done on the command-line with
 
