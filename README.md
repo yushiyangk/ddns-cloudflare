@@ -184,6 +184,7 @@ sudo service ddns-cloudflare status
 		--mount type=tmpfs,target=/container \
 		--mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly \
 		--mount type=bind,source=<var>working_dir</var>/ssmtp.conf,target=/etc/ssmtp/ssmtp.conf,readonly \
+		--mount type=bind,source=<var>working_dir</var>/timezone,target=/etc/timezone,readonly \
 		--network=<var>network_name</var> \
 		--env-file=env \
 		--env MAIL_TO="$(grep ^root: /etc/aliases | cut -d ' ' -f 2)" \
