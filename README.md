@@ -63,6 +63,7 @@ To install ddns-cloudflare for Docker Compose:
 	```sh
 	curl -s https://api.github.com/repos/yushiyangk/ddns-cloudflare/releases/latest | grep -F ddns-cloudflare-1. | grep -F docker-compose.zip | grep -F browser_download_url | head -n 1 | cut -d ':' -f 2- | tr -d '"' | sudo wget -q -i - -P /srv/docker/ddns-cloudflare/  # Download latest 1.x release
 	sudo unzip /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-compose.zip -d /srv/docker/ddns-cloudflare/
+	sudo rm /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-compose.zip
 	```
 
 	If a previous version is already installed, you will be prompted to replace the existing files. Be careful not to clobber the existing `env`.
@@ -124,6 +125,7 @@ sudo service ddns-cloudflare status
 	```sh
 	curl -s https://api.github.com/repos/yushiyangk/ddns-cloudflare/releases/latest | grep -F ddns-cloudflare-1. | grep -F docker-run.zip | grep -F browser_download_url | head -n 1 | cut -d ':' -f 2- | tr -d '"' | sudo wget -q -i - -P /srv/docker/ddns-cloudflare/  # Download latest 1.x release
 	sudo unzip /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-run.zip -d /srv/docker/ddns-cloudflare/
+	sudo rm /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-run.zip
 	```
 
 	If a previous version is already installed, you will be prompted to replace the existing files. Be careful not to clobber the existing `env`.
