@@ -8,7 +8,9 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 
 1. Ensure that `curl`, `jq` and `xargs` (part of `findutils`) are installed and accessible on `PATH`
 
-2. Install the `ddns-cloudflare` executable file from this repository to `/opt/ddns-cloudflare/` and ensure that it is owned by root with permissions `u+x,o-wx`
+2. Download the <code>ddns-cloudflare-<var>version</var>-bash.zip</code> release file and extract the `ddns-cloudflare` executable to `/opt/ddns-cloudflare/`
+
+3. Ensure that `/opt/ddns-cloudflare/ddns-cloudflare` is owned by root and has permissions `'u+x,o-wx`
 
 4. [Add `/opt/ddns-cloudflare` to `PATH`](#add-optddns-cloudflare-or-optbin-to-sudo-path) (or add `/opt/bin` to `PATH` and add symlink `ln -s /opt/ddns-cloudflare/ddns-cloudflare /opt/bin/ddns-cloudflare`)
 
@@ -56,7 +58,7 @@ This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
 
 To install ddns-cloudflare for Docker Compose:
 
-1. Download the <code>ddns-cloudflare-<var>version</var>-docker-compose.zip</code> file and extract it to `/srv/docker/ddns-cloudflare`
+1. Download the <code>ddns-cloudflare-<var>version</var>-docker-compose.zip</code> release file and extract it to `/srv/docker/ddns-cloudflare`
 
 	This can be done on the command-line with
 
@@ -118,7 +120,7 @@ sudo service ddns-cloudflare status
 
 	This will automatically fetch the latest 1.x release and build it. The build argument `cach_date` invalidates the build cache at the end of each day, so that the packages installed from the distribution are up to date with the latest fixes. Set <code><var>image_name</var></code> to `ddns-cloudflare` unless otherwise desired.
 
-3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> file and extract it to `/srv/docker/ddns-cloudflare`
+3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> release file and extract it to `/srv/docker/ddns-cloudflare`
 
 	This can be done on the command-line with
 
