@@ -2,6 +2,11 @@
 
 This project follows [Semantic Versioning (SemVer)](https://semver.org/spec/v2.0.0.html).
 
+### 1.1.2
+
+- Fixed: there should be no error messages when there are no config files in the top-level config directory, since the recommended practice is now to use subdirectories corresponding to DNS zones
+- Updated example configs to use subdirectories
+
 ### 1.1.1
 
 - Fixed errors in documentation
