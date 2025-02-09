@@ -54,17 +54,19 @@ This runs `ddns-cloudflare` every <code><var>interval</var></code> minutes.
 
 ## Docker installation
 
-Run ddns-cloudflare using Docker Compose:
+To install ddns-cloudflare for Docker Compose:
 
-1. Create the working directory at `/srv/docker/ddns-cloudflare`.
+1. Download the <code>ddns-cloudflare-<var>version</var>-docker-compose.zip</code> file and extract it to `/srv/docker/ddns-cloudflare`
 
-2. Copy the contents of `docker/compose` from this repository to the working directory, either manually or by running
+	This can be done on the command-line with
 
+	```sh
+	curl -s https://api.github.com/repos/yushiyangk/ddns-cloudflare/releases/latest | grep -F ddns-cloudflare-1. | grep -F docker-compose.zip | grep -F browser_download_url | head -n 1 | cut -d ':' -f 2- | tr -d '"' | sudo wget -q -i - -P /srv/docker/ddns-cloudflare/  # Download latest 1.x release
+	sudo unzip /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-compose.zip -d /srv/docker/ddns-cloudflare/
+	sudo rm /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-compose.zip
 	```
-	sudo curl -L https://codeload.github.com/yushiyangk/ddns-cloudflare/zip/refs/heads/docker -o ddns-cloudflare.zip && sudo unzip -t ddns-cloudflare.zip
-	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/compose/*
-	sudo find ddns-cloudflare-docker/docker/compose -mindepth 1 -maxdepth 1 -exec mv -n "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
-	```
+
+	If a previous version is already installed, you will be prompted to replace the existing files. Be careful not to clobber the existing `env`.
 
 ### Configure
 
@@ -104,21 +106,29 @@ sudo service ddns-cloudflare status
 
 ### Docker without Compose
 
-1. Create a working directory, e.g. at `/srv/docker/ddns-cloudflare`.
+1. Create a working directory, e.g. at `/srv/docker/ddns-cloudflare`
 
-2. Build the container
+2. Build the image
 
-	<pre><code>sudo docker build --force-rm -t <var>image_name</var> --build-arg cache_date="$(date -Idate)" 'https://github.com/yushiyangk/ddns-cloudflare.git#docker' -f docker/build/Dockerfile</code></pre>
+	<pre><code>sudo docker build --force-rm \
+		-t <var>image_name</var> \
+		--build-arg cache_date="$(date -Idate)" \
+		'https://github.com/yushiyangk/ddns-cloudflare.git#release-v1' \
+		-f docker/build/Dockerfile</code></pre>
 
-	This will automatically fetch the latest version from GitHub and build it. The build argument `cach_date` invalidates the build cache at the end of each day, so that the packages installed from the distribution are up to date with the latest fixes. Set <code><var>image_name</var></code> to `ddns-cloudflare` unless otherwise desired.
+	This will automatically fetch the latest 1.x release and build it. The build argument `cach_date` invalidates the build cache at the end of each day, so that the packages installed from the distribution are up to date with the latest fixes. Set <code><var>image_name</var></code> to `ddns-cloudflare` unless otherwise desired.
 
-3. Copy the contents of `docker/run` from the repository into the working directory, either manually or by running
+3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> file and extract it to `/srv/docker/ddns-cloudflare`
 
+	This can be done on the command-line with
+
+	```sh
+	curl -s https://api.github.com/repos/yushiyangk/ddns-cloudflare/releases/latest | grep -F ddns-cloudflare-1. | grep -F docker-run.zip | grep -F browser_download_url | head -n 1 | cut -d ':' -f 2- | tr -d '"' | sudo wget -q -i - -P /srv/docker/ddns-cloudflare/  # Download latest 1.x release
+	sudo unzip /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-run.zip -d /srv/docker/ddns-cloudflare/
+	sudo rm /srv/docker/ddns-cloudflare/ddns-cloudflare-*-docker-run.zip
 	```
-	sudo curl -L https://codeload.github.com/yushiyangk/ddns-cloudflare/zip/refs/heads/docker -o ddns-cloudflare.zip && sudo unzip -t ddns-cloudflare.zip
-	sudo unzip ddns-cloudflare.zip ddns-cloudflare-docker/docker/run/*
-	sudo find ddns-cloudflare-docker/docker/run -mindepth 1 -maxdepth 1 -exec mv "{}" . \; && sudo rm -r ddns-cloudflare-docker ddns-cloudflare.zip
-	```
+
+	If a previous version is already installed, you will be prompted to replace the existing files. Be careful not to clobber the existing `env`.
 
 4. [Configure `config/domains` and `config/auth` as above.](#configure)
 
@@ -132,7 +142,17 @@ sudo service ddns-cloudflare status
 
 7. Run the container
 
-	<pre><code>sudo docker run -it -d --rm --init --cap-drop all --cap-add CAP_SETGID --security-opt=no-new-privileges --read-only --mount type=tmpfs,target=/container --mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly --mount type=bind,source=<var>working_dir</var>/ssmtp.conf,target=/etc/ssmtp/ssmtp.conf,readonly --network=<var>network_name</var> --env-file=env --env MAIL_TO="$(grep ^root: /etc/aliases | cut -d ' ' -f 2)" --env MAIL_DOMAIN="$(cat /etc/mailname)" --name=<var>container_name</var> <var>image_name</var> <var>arguments</var></code></pre>
+	<pre><code>sudo docker run -it -d --rm --init \
+		--cap-drop all --cap-add CAP_SETGID --security-opt=no-new-privileges --read-only \
+		--mount type=tmpfs,target=/container \
+		--mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly \
+		--mount type=bind,source=<var>working_dir</var>/ssmtp.conf,target=/etc/ssmtp/ssmtp.conf,readonly \
+		--network=<var>network_name</var> \
+		--env-file=env \
+		--env MAIL_TO="$(grep ^root: /etc/aliases | cut -d ' ' -f 2)" \
+		--env MAIL_DOMAIN="$(cat /etc/mailname)" \
+		--name=<var>container_name</var> \
+		<var>image_name</var> <var>arguments</var></code></pre>
 
 	This sets `MAIL_DOMAIN` to the same fully qualified host name of the host and sets `MAIL_TO` to the same address that the host forwards all root mail to. These override the settings in `env`, if any. Alternatively, they can be omitted to use the settings in `env`.
 

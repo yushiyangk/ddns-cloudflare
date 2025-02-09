@@ -2,7 +2,7 @@ name: ddns-cloudflare
 services:
   cron:
     build:
-      context: https://github.com/yushiyangk/ddns-cloudflare.git#docker
+      context: https://github.com/yushiyangk/ddns-cloudflare.git#release-v1
       dockerfile: docker/build/Dockerfile
       pull: true
     image: ddns-cloudflare

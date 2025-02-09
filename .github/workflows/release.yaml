@@ -1,0 +1,42 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '1.*'
+      - '2.*'
+
+jobs:
+  build-job:
+    name: Build and create release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create output directory
+        run: mkdir -p release
+      - name: Package for Docker Compose
+        working-directory: docker/compose
+        run: zip ../../release/ddns-cloudflare-${{ github.ref_name }}-docker-compose.zip *
+      - name: Package for Docker run
+        working-directory: docker/run
+        run: zip ../../release/ddns-cloudflare-${{ github.ref_name }}-docker-run.zip *
+      - name: Package Bash script
+        run: zip release/ddns-cloudflare-${{ github.ref_name }}-bash.zip ddns-cloudflare
+      - name: Generate release description from CHANGELOG.md
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+          # Need to substitute '.' with '\.' to escape it in regex
+        run: |
+          sed CHANGELOG.md -n -e '/###[[:space:]]*'"${RELEASE_VERSION//./\\.}"'/,/###[[:space:]]*.\+/p' | tail -n +2 | head -n -1 | tee release/RELEASE.md
+          echo >> release/RELEASE.md
+          echo 'For documentation specific to this release, refer to [README.md for version ${{ github.ref_name }}](https://github.com/yushiyangk/ddns-cloudflare/tree/${{ github.ref_name }}).' >> release/RELEASE.md
+        # Head and tail to remove the first and last line
+      - name: Create release
+        uses: yushiyangk/action-gh-release@v2
+        with:
+          draft: true
+          files: 'release/*.zip'
+          fail_on_unmatched_files: true
+          body_path: release/RELEASE.md
