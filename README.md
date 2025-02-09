@@ -125,14 +125,16 @@ sudo docker compose up
 Install the Systemd unit file and enable the service:
 
 ```
-sudo ln -s /srv/docker/ddns-cloudflare/ddns-cloudflare.service /etc/systemd/system/ddns-cloudflare.service && sudo systemctl daemon-reload
-sudo systemctl enable ddns-cloudflare && sudo service ddns-cloudflare start
+sudo ln -s /srv/docker/ddns-cloudflare/ddns-cloudflare.service /etc/systemd/system/ddns-cloudflare.service
+sudo systemctl daemon-reload
+sudo systemctl enable ddns-cloudflare
+sudo systemctl start ddns-cloudflare
 ```
 
 Check the status of the service:
 
 ```
-sudo service ddns-cloudflare status
+sudo systemctl status ddns-cloudflare
 ```
 
 ### Docker without Compose
