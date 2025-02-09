@@ -16,20 +16,35 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 
 ### Configure
 
-1. Create config directory at `/etc/opt/ddns-cloudflare`
+1. Create the config directory at `/etc/opt/ddns-cloudflare`
 
-2. Create the file `/etc/opt/ddns-cloudflare/domains`, owned by root with permissions `o-w`, containing
-	<pre><code>domains=<var>list_of_domains</var></code></pre>
+2. For each separate DNS zone that should be updated,
 
-	<code><var>list_of_domains</var></code> is a comma-separated list of domains that should be updated. The domains should be fully qualified, may contain asterisks for wildcards, and may optionally be enclosed in single or double quotes.
+	1. Create a subdirectory at <code>/etc/opt/ddns-cloudflare/<var>zone_name</var></code>, e.g. <code>/etc/opt/ddns-cloudflare/example.com</code>.
 
-3. Create the file `/etc/opt/ddns-cloudflare/auth`, owned by root with permissions `go-rwx`, containing
-	<pre><code>zoneid=<var>zone_id</var>
-	authtoken=<var>api_token</var></code></pre>
+		The <code><var>zone_name</var></code> is typically the domain name of the zone, but it does not have to be.
 
-	The values may optionally be enclosed in single or double quotes.
+	2. Create the file <code>/etc/opt/ddns-cloudflare/<var>zone_name</var>/domains</code>`, owned by root with permissions `o-w`, containing
+		<pre><code>domains=<var>list_of_domains</var></code></pre>
 
-	Make sure that only root has read permissions on this file as it contains the API key.
+		<code><var>list_of_domains</var></code> is a comma-separated list of domains that should be updated. Each of the domains should be fully qualified, may contain asterisks for wildcards, and may optionally be enclosed in single or double quotes.
+
+		For example,
+		```
+		domains='example.com', 'subdomain.example.com', '*.wildcard.example.com'
+		```
+
+	3. Create the file <code>/etc/opt/ddns-cloudflare/<var>zone_name</var>/auth</code>, owned by root with permissions `go-rwx`, containing
+		<pre><code>zoneid=<var>zone_id</var>
+		authtoken=<var>api_token</var></code></pre>
+
+		The values may optionally be enclosed in single or double quotes.
+
+		**Warning:** Make sure that only root has read permissions on this file as it contains the API key.
+
+#### Backwards compatibility with single-zone config
+
+For backwards compatibility, the config files at `/etc/opt/ddns-cloudflare/domain` and `/etc/opt/ddns-cloudflare/auth` will also be treated as a separate DNS zone, with an implicit <code><var>zone_name</var></code> of `(default)`. New installations should avoid using this behaviour as it is likely to be deprecated in the future.
 
 ### Run
 
