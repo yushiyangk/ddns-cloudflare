@@ -179,7 +179,7 @@ sudo service ddns-cloudflare status
 
 7. Run the container
 
-	<pre><code>sudo docker run -it -d --rm --init \
+	<pre><code>sudo docker run -it --rm --init \
 		--cap-drop all --cap-add CAP_SETGID --security-opt=no-new-privileges --read-only \
 		--mount type=tmpfs,target=/container \
 		--mount type=bind,source=<var>working_dir</var>/config,target=/etc/opt/ddns-cloudflare,readonly \
@@ -196,7 +196,7 @@ sudo service ddns-cloudflare status
 
 	Set <code><var>container_name</var></code> to `ddns-cloudflare` unless otherwise desired. Note that <code><var>working_dir</var></code> is the current working directory and must be an absolute path, and that <code><var>arguments</var></code> are the arguments for `ddns-cloudflare`.
 
-	Add `-d` before the <code><var>image_name</var></code> to run the container in the background.
+	Add `-d` after `docker run` and before <code><var>image_name</var></code> to run the container in the background.
 
 ## Troubleshooting
 
