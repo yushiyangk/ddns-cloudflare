@@ -34,6 +34,8 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 		domains='example.com', 'subdomain.example.com', '*.wildcard.example.com'
 		```
 
+		**Note:** Each of these domains must already have an A record present in Cloudflare DNS. If they are not, first manually add the corresponding A records with an arbitrary dummy IP address, such as `0.0.0.0`. Otherwise, the update operation will fail.
+
 	3. Create the file <code>/etc/opt/ddns-cloudflare/<var>zone_name</var>/auth</code>, owned by root with permissions `go-rwx`, containing
 		<pre><code>zoneid=<var>zone_id</var>
 		authtoken=<var>api_token</var></code></pre>
