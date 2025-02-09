@@ -133,68 +133,72 @@ fi
 
 
 # Renew certs for the default config in $config_dir (for backwards compatibility)
-error=0
-delayed_print_error=0
+if [ -f "$config_dir/auth" ]; then
+	if [ -f "$config_dir/domains" ]; then
+		error=0
+		delayed_print_error=0
 
-# auth
-zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$config_dir/auth" | xargs -n 1 )"
-authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$config_dir/auth" | xargs -n 1 )"
-# domains
-IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$config_dir/domains" | xargs -d ',' -n 1 | xargs -l ) )
+		# auth
+		zoneid="$( sed -n "s/^\s*zoneid\s*=\s*\(.\+\)/\1/p" "$config_dir/auth" | xargs -n 1 )"
+		authtoken="$( sed -n "s/^\s*authtoken\s*=\s*\(.\+\)/\1/p" "$config_dir/auth" | xargs -n 1 )"
+		# domains
+		IFS=$'\n' names=( $( sed -n "s/^\s*domains\s*=\s*\(.\+\)/\1/p" "$config_dir/domains" | xargs -d ',' -n 1 | xargs -l ) )
 
-for i in "${names[@]}"; do
-	response="$( curl -s -X GET 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records?type=A&name='"${i}" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" )"
-	recordip="$( echo "$response" | jq -Mr '.result[0].content' )"
-	if [ "$recordip" != "$publicip" ]; then
-		recordid="$( echo "$response" | jq -Mr '.result[0].id' )"
-		recordttl="$( echo "$response" | jq -Mr '.result[0].ttl' )"
-		recordproxied="$( echo "$response" | jq -Mr '.result[0].proxied' )"
-		code="$( curl -s -o /tmp/ddns-cloudflare.response -w '%{http_code}' -X PUT 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records/'"$recordid" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" --data '{"type":"A","name":"'"${i}"'","content":"'"$publicip"'","ttl":'"$recordttl"',"proxied":'"$recordproxied"'}' )"
-		if [ "$code" == 200 ]; then
-			if [ $quiet -le 1 ]; then
-				echo -e "200: \e[97m${i}\e[39m updated to $publicip"
+		for i in "${names[@]}"; do
+			response="$( curl -s -X GET 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records?type=A&name='"${i}" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" )"
+			recordip="$( echo "$response" | jq -Mr '.result[0].content' )"
+			if [ "$recordip" != "$publicip" ]; then
+				recordid="$( echo "$response" | jq -Mr '.result[0].id' )"
+				recordttl="$( echo "$response" | jq -Mr '.result[0].ttl' )"
+				recordproxied="$( echo "$response" | jq -Mr '.result[0].proxied' )"
+				code="$( curl -s -o /tmp/ddns-cloudflare.response -w '%{http_code}' -X PUT 'https://api.cloudflare.com/client/v4/zones/'"$zoneid"'/dns_records/'"$recordid" -H 'Content-Type:application/json' -H 'Authorization: Bearer '"$authtoken" --data '{"type":"A","name":"'"${i}"'","content":"'"$publicip"'","ttl":'"$recordttl"',"proxied":'"$recordproxied"'}' )"
+				if [ "$code" == 200 ]; then
+					if [ $quiet -le 1 ]; then
+						echo -e "200: \e[97m${i}\e[39m updated to $publicip"
+					fi
+					if [ -f /tmp/ddns-cloudflare.first-error ]; then
+						rm /tmp/ddns-cloudflare.first-error
+					fi
+				else
+					error=1
+					if [ $quiet -le 1 ]; then
+						echo -e "\e[31m$code: \e[97m${i}\e[31m failed to update\e[39m"
+					fi
+					if [ -z "$warn_threshold" ]; then
+						echo -n "$name: (default): " >& 2
+						cat /tmp/ddns-cloudflare.response >& 2
+					else
+						if [ -f /tmp/ddns-cloudflare.first-error ]; then
+							if [ $warn_threshold -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
+								echo -n "$name: (default): " >& 2
+								cat /tmp/ddns-cloudflare.response >& 2
+								echo "" >& 2
+								delayed_print_error=1
+							fi
+						else
+							date +%s > /tmp/ddns-cloudflare.first-error
+						fi
+					fi
+				fi
+				rm /tmp/ddns-cloudflare.response
+			else
+				if [ $quiet -le 0 ]; then
+					echo -e "\e[97m${i}\e[39m unchanged; skipped"
+				fi
 			fi
+		done
+
+		if [ $delayed_print_error -ne 0 ]; then
+			echo "$name: (default): failing since $(date -d @"$(cat /tmp/ddns-cloudflare.first-error)" -R)" >& 2
+			rm /tmp/ddns-cloudflare.first-error
+		fi
+		if [ $error -ne 0 ]; then
+			exit $error
+		else
 			if [ -f /tmp/ddns-cloudflare.first-error ]; then
 				rm /tmp/ddns-cloudflare.first-error
 			fi
-		else
-			error=1
-			if [ $quiet -le 1 ]; then
-				echo -e "\e[31m$code: \e[97m${i}\e[31m failed to update\e[39m"
-			fi
-			if [ -z "$warn_threshold" ]; then
-				echo -n "$name: (default): " >& 2
-				cat /tmp/ddns-cloudflare.response >& 2
-			else
-				if [ -f /tmp/ddns-cloudflare.first-error ]; then
-					if [ $warn_threshold -gt $(cat /tmp/ddns-cloudflare.first-error) ]; then
-						echo -n "$name: (default): " >& 2
-						cat /tmp/ddns-cloudflare.response >& 2
-						echo "" >& 2
-						delayed_print_error=1
-					fi
-				else
-					date +%s > /tmp/ddns-cloudflare.first-error
-				fi
-			fi
 		fi
-		rm /tmp/ddns-cloudflare.response
-	else
-		if [ $quiet -le 0 ]; then
-			echo -e "\e[97m${i}\e[39m unchanged; skipped"
-		fi
-	fi
-done
-
-if [ $delayed_print_error -ne 0 ]; then
-	echo "$name: (default): failing since $(date -d @"$(cat /tmp/ddns-cloudflare.first-error)" -R)" >& 2
-	rm /tmp/ddns-cloudflare.first-error
-fi
-if [ $error -ne 0 ]; then
-	exit $error
-else
-	if [ -f /tmp/ddns-cloudflare.first-error ]; then
-		rm /tmp/ddns-cloudflare.first-error
 	fi
 fi
 
