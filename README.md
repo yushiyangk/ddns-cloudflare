@@ -89,7 +89,7 @@ To install ddns-cloudflare for Docker Compose:
 
 ### Configure
 
-1. [Configure `cron/ddns-cloudflare/domains` and `cron/ddns-cloudflare/auth` as above](#configure), except that the config directory is **`/srv/docker/ddns-cloudflare/cron/ddns-cloudflare`** instead of `/etc/opt/ddns-cloudflare`.
+1. [Configure `cron/ddns-cloudflare/domains` and `cron/ddns-cloudflare/auth` as above](#configure), except that the config directory is **`/srv/docker/ddns-cloudflare/cron/ddns-cloudflare`** instead of `/etc/opt/ddns-cloudflare`. An example DNS zone is provided and should be edited.
 
 	Alternatively, an existing config at `/etc/opt/ddns-cloudflare` can be used by symlinking to it
 	```
@@ -161,7 +161,7 @@ sudo service ddns-cloudflare status
 
 	If a previous version is already installed, you will be prompted to replace the existing files. Be careful not to clobber the existing `env`.
 
-4. [Configure `config/domains` and `config/auth` as above.](#configure), except that the config directory is **`/srv/docker/ddns-cloudflare/config`** instead of `/etc/opt/ddns-cloudflare`.
+4. [Configure `config/domains` and `config/auth` as above.](#configure), except that the config directory is **`/srv/docker/ddns-cloudflare/config`** instead of `/etc/opt/ddns-cloudflare`. An example DNS zone is provided and should be edited.
 
 	Alternatively, an existing config at `/etc/opt/ddns-cloudflare` can be used by symlinking to it
 	```
