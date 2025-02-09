@@ -1,0 +1,15 @@
+[Unit]
+Description=Dynamic DNS updater for Cloudflare via Docker Compose
+Requires=docker.service network.target
+After=docker.service network.target
+
+[Service]
+WorkingDirectory=/srv/docker/ddns-cloudflare
+ExecStartPre=/usr/bin/env bash -c '/usr/bin/docker compose build --build-arg cache_date="$(date -Idate)" && /usr/bin/docker image prune -f'
+ExecStart=/usr/bin/docker compose up
+ExecStop=/usr/bin/docker compose down
+TimeoutStartSec=0
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

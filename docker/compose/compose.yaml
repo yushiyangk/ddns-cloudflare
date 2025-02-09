@@ -1,0 +1,44 @@
+name: ddns-cloudflare
+services:
+  cron:
+    build:
+      context: https://github.com/yushiyangk/ddns-cloudflare.git#docker
+      dockerfile: docker/build/Dockerfile
+      pull: true
+    image: ddns-cloudflare
+    env_file:
+      - env
+    init: true
+    tty: true
+    stdin_open: true
+    cap_drop:
+      - all
+    cap_add:
+      - CAP_SETGID
+    security_opt:
+      - no-new-privileges
+    read_only: true
+    volumes:
+      - type: tmpfs
+        target: /container
+      - type: tmpfs
+        target: /tmp
+      - type: bind
+        source: cron/ddns-cloudflare
+        target: /etc/opt/ddns-cloudflare
+        read_only: true
+      - type: bind
+        source: cron/ssmtp.conf
+        target: /etc/ssmtp/ssmtp.conf
+        read_only: true
+      - type: bind
+        source: timezone
+        target: /etc/timezone
+        read_only: true
+    networks:
+      - network
+    command: -qq -w 15
+
+networks:
+  network:
+    driver: bridge
