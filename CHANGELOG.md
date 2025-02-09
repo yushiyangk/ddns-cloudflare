@@ -2,6 +2,12 @@
 
 This project follows [Semantic Versioning (SemVer)](https://semver.org/spec/v2.0.0.html).
 
+### 1.1.1
+
+- Fixed errors in documentation
+	- Config directories for installations with Docker (with and without Compose) are different, and have now been noted
+	- `docker run` instructions was missing a mount
+
 ### 1.1
 
 - Added support for multiple DNS zones

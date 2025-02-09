@@ -18,10 +18,10 @@ jobs:
         run: mkdir -p release
       - name: Package for Docker Compose
         working-directory: docker/compose
-        run: zip ../../release/ddns-cloudflare-${{ github.ref_name }}-docker-compose.zip *
+        run: zip ../../release/ddns-cloudflare-${{ github.ref_name }}-docker-compose.zip -r *
       - name: Package for Docker run
         working-directory: docker/run
-        run: zip ../../release/ddns-cloudflare-${{ github.ref_name }}-docker-run.zip *
+        run: zip ../../release/ddns-cloudflare-${{ github.ref_name }}-docker-run.zip -r *
       - name: Package Bash script
         run: zip release/ddns-cloudflare-${{ github.ref_name }}-bash.zip ddns-cloudflare
       - name: Generate release description from CHANGELOG.md
