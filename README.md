@@ -149,7 +149,7 @@ sudo systemctl status ddns-cloudflare
 		'https://github.com/yushiyangk/ddns-cloudflare.git#release-v1' \
 		-f docker/build/Dockerfile</code></pre>
 
-	This will automatically fetch the latest 1.x release and build it. The build argument `cach_date` invalidates the build cache at the end of each day, so that the packages installed from the distribution are up to date with the latest fixes. Set <code><var>image_name</var></code> to `ddns-cloudflare` unless otherwise desired.
+	This will automatically fetch the latest 1.x release and build it. The build argument `cache_date` invalidates the build cache at the end of each day, so that the packages installed from the distribution are up to date with the latest fixes. Set <code><var>image_name</var></code> to `ddns-cloudflare` or as otherwise desired.
 
 3. Download the <code>ddns-cloudflare-<var>version</var>-docker-run.zip</code> release file and extract it to the working directory
 
@@ -177,7 +177,7 @@ sudo systemctl status ddns-cloudflare
 
 	<pre><code>sudo docker network create -t bridge <var>network_name</var></code></pre>
 
-	Set <code><var>network_name</var></code> to `ddns-cloudflare-bridge` unless otherwise desired.
+	Set <code><var>network_name</var></code> to `ddns-cloudflare-bridge` or as otherwise desired.
 
 7. Run the container
 
@@ -196,7 +196,7 @@ sudo systemctl status ddns-cloudflare
 
 	This sets `MAIL_DOMAIN` to the same fully qualified host name of the host and sets `MAIL_TO` to the same address that the host forwards all root mail to. These override the settings in `env`, if any. Alternatively, they can be omitted to use the settings in `env`.
 
-	Set <code><var>container_name</var></code> to `ddns-cloudflare` unless otherwise desired. Note that <code><var>working_dir</var></code> is the current working directory and must be an absolute path, and that <code><var>arguments</var></code> are the arguments for `ddns-cloudflare`.
+	Set <code><var>container_name</var></code> to `ddns-cloudflare` or as otherwise desired. Note that <code><var>working_dir</var></code> is the current working directory and must be an absolute path, and that <code><var>arguments</var></code> are the arguments for `ddns-cloudflare`.
 
 	Add `-d` after `docker run` and before <code><var>image_name</var></code> to run the container in the background.
 
