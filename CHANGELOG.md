@@ -2,6 +2,10 @@
 
 This project follows [Semantic Versioning (SemVer)](https://semver.org/spec/v2.0.0.html).
 
+### 1.1.3
+
+- Changed: failure to rebuild the Docker container will no longer cause the systemd service to fail to run
+
 ### 1.1.2
 
 - Fixed: there should be no error messages when there are no config files in the top-level config directory, since the recommended practice is now to use subdirectories corresponding to DNS zones
