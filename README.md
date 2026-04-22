@@ -10,7 +10,7 @@ This tool depends on the packages `curl`, `findutils` and `jq`.
 
 2. Download the <code>ddns-cloudflare-<var>version</var>-bash.zip</code> release file and extract the `ddns-cloudflare` executable to `/opt/ddns-cloudflare/`
 
-3. Ensure that `/opt/ddns-cloudflare/ddns-cloudflare` is owned by root and has permissions `'u+x,o-wx`
+3. Ensure that `/opt/ddns-cloudflare/ddns-cloudflare` is owned by root and has permissions `u+x,o-wx`
 
 4. [Add `/opt/ddns-cloudflare` to `PATH`](#add-optddns-cloudflare-or-optbin-to-sudo-path) (or add `/opt/bin` to `PATH` and add symlink `ln -s /opt/ddns-cloudflare/ddns-cloudflare /opt/bin/ddns-cloudflare`)
 
