@@ -29,7 +29,7 @@ jobs:
           RELEASE_VERSION: ${{ github.ref_name }}
           # Need to substitute '.' with '\.' to escape it in regex
         run: |
-          sed CHANGELOG.md -n -e '/###[[:space:]]*'"${RELEASE_VERSION//./\\.}"'/,/###[[:space:]]*.\+/p' | tail -n +2 | head -n -1 | tee release/RELEASE.md
+          sed CHANGELOG.md -n -e '/^###[[:space:]]*'"${RELEASE_VERSION//./\\.}"'/,/^###[^#].\+/p' | tail -n +2 | head -n -1 | tee release/RELEASE.md
           echo >> release/RELEASE.md
           echo 'For documentation specific to this release, refer to [README.md for version ${{ github.ref_name }}](https://github.com/yushiyangk/ddns-cloudflare/tree/${{ github.ref_name }}).' >> release/RELEASE.md
         # Head and tail to remove the first and last line
